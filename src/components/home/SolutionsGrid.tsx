@@ -5,12 +5,13 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { solutions, getStatusLabel, getStatusColor, getBusinessAreaLabel } from '@/data/solutions';
+import { getSolutions, getStatusLabel, getStatusColor, getBusinessAreaLabel } from '@/data/solutions';
 import type { SolutionStatus, BusinessArea } from '@/types/solution';
 
 const SolutionsGrid = () => {
   const [statusFilter, setStatusFilter] = useState<SolutionStatus | 'all'>('all');
   const [businessAreaFilter, setBusinessAreaFilter] = useState<BusinessArea | 'all'>('all');
+  const solutions = getSolutions();
 
   const filteredSolutions = solutions.filter(solution => {
     const statusMatch = statusFilter === 'all' || solution.status === statusFilter;

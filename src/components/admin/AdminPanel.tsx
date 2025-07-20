@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ArrowLeft, Plus, Edit, Trash2, Upload, FileText, Save, X } from 'lucide-react';
+import { ArrowLeft, Plus, Edit, Trash2, Upload, FileText, Save, X, Download, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -8,14 +8,15 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { useNavigate } from 'react-router-dom';
-import { solutions, getStatusLabel, getStatusColor } from '@/data/solutions';
+import { getSolutions, getStatusLabel, getStatusColor, updateSolutions } from '@/data/solutions';
+import { saveSolutions, loadSolutions, exportSolutionsAsJSON, clearStorageData } from '@/utils/storage';
 import type { Solution, SolutionStatus, BusinessArea } from '@/types/solution';
 
 const AdminPanel = () => {
   const navigate = useNavigate();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [showAddForm, setShowAddForm] = useState(false);
-  const [localSolutions, setLocalSolutions] = useState<Solution[]>(solutions);
+  const [localSolutions, setLocalSolutions] = useState<Solution[]>(() => getSolutions());
 
   const businessAreas: BusinessArea[] = ['front-office', 'back-office', 'core-capabilities', 'products-services'];
   const statuses: SolutionStatus[] = ['conceito', 'prototipo', 'teste-usuarios', 'teste-convite', 'parceria', 'live'];
@@ -60,7 +61,10 @@ const AdminPanel = () => {
 
   const handleDelete = (id: string) => {
     if (confirm('Tem certeza que deseja excluir esta solução?')) {
-      setLocalSolutions(prev => prev.filter(s => s.id !== id));
+      const updatedSolutions = localSolutions.filter(s => s.id !== id);
+      setLocalSolutions(updatedSolutions);
+      updateSolutions(updatedSolutions);
+      saveSolutions(updatedSolutions);
     }
   };
 
@@ -77,11 +81,16 @@ const AdminPanel = () => {
       updatedAt: new Date(),
     } as Solution;
 
+    let updatedSolutions: Solution[];
     if (editingId) {
-      setLocalSolutions(prev => prev.map(s => s.id === editingId ? newSolution : s));
+      updatedSolutions = localSolutions.map(s => s.id === editingId ? newSolution : s);
     } else {
-      setLocalSolutions(prev => [...prev, newSolution]);
+      updatedSolutions = [...localSolutions, newSolution];
     }
+
+    setLocalSolutions(updatedSolutions);
+    updateSolutions(updatedSolutions);
+    saveSolutions(updatedSolutions);
 
     setShowAddForm(false);
     setEditingId(null);
@@ -112,6 +121,26 @@ const AdminPanel = () => {
     }));
   };
 
+  const handleExportData = () => {
+    const dataStr = exportSolutionsAsJSON(localSolutions);
+    const dataBlob = new Blob([dataStr], { type: 'application/json' });
+    const url = URL.createObjectURL(dataBlob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `drakoyuda-solutions-${new Date().toISOString().split('T')[0]}.json`;
+    link.click();
+    URL.revokeObjectURL(url);
+  };
+
+  const handleRefreshData = () => {
+    if (confirm('Isto irá recarregar os dados do localStorage. Continuar?')) {
+      const savedData = loadSolutions();
+      if (savedData) {
+        setLocalSolutions(savedData);
+      }
+    }
+  };
+
   return (
     <div className="min-h-screen bg-background p-6">
       <div className="container max-w-6xl">
@@ -136,17 +165,35 @@ const AdminPanel = () => {
             </div>
           </div>
           
-          <Button 
-            onClick={() => {
-              setShowAddForm(true);
-              setEditingId(null);
-              resetForm();
-            }}
-            className="bg-accent hover:bg-accent/90"
-          >
-            <Plus className="h-4 w-4 mr-2" />
-            Nova Solução
-          </Button>
+          <div className="flex space-x-2">
+            <Button 
+              variant="outline"
+              onClick={handleExportData}
+              className="flex items-center space-x-2"
+            >
+              <Download className="h-4 w-4" />
+              <span>Exportar</span>
+            </Button>
+            <Button 
+              variant="outline"
+              onClick={handleRefreshData}
+              className="flex items-center space-x-2"
+            >
+              <RefreshCw className="h-4 w-4" />
+              <span>Recarregar</span>
+            </Button>
+            <Button 
+              onClick={() => {
+                setShowAddForm(true);
+                setEditingId(null);
+                resetForm();
+              }}
+              className="bg-accent hover:bg-accent/90"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Nova Solução
+            </Button>
+          </div>
         </div>
 
         {/* Add/Edit Form */}

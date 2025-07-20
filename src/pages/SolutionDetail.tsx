@@ -7,10 +7,11 @@ import { Separator } from '@/components/ui/separator';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import Header from '@/components/layout/Header';
 import ImageCarousel from '@/components/solution/ImageCarousel';
-import { solutions, getStatusLabel, getStatusColor, getBusinessAreaLabel } from '@/data/solutions';
+import { getSolutions, getStatusLabel, getStatusColor, getBusinessAreaLabel } from '@/data/solutions';
 
 const SolutionDetail = () => {
   const { id } = useParams<{ id: string }>();
+  const solutions = getSolutions();
   const solution = solutions.find(s => s.id === id);
 
   if (!solution) {
