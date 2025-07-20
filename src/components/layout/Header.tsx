@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Menu, X, Brain, Users, Target } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { ThemeToggle } from '@/components/ui/theme-toggle';
 import PinModal from '@/components/admin/PinModal';
 import drakoLogo from '@/assets/drakoyuda_simbolo.png';
 
@@ -65,8 +66,9 @@ const Header = () => {
           })}
         </nav>
 
-        {/* CTA Button */}
+        {/* Theme Toggle & CTA Button */}
         <div className="hidden md:flex items-center space-x-4">
+          <ThemeToggle />
           <Button 
             variant="outline" 
             size="sm"
@@ -109,7 +111,10 @@ const Header = () => {
                 </Link>
               );
             })}
-            <div className="pt-4 border-t border-border/40">
+            <div className="pt-4 border-t border-border/40 space-y-3">
+              <div className="flex justify-center">
+                <ThemeToggle />
+              </div>
               <Button 
                 className="w-full justify-center border-accent/30 text-accent hover:bg-accent/10" 
                 variant="outline"
