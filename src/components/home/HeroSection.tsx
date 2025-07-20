@@ -125,6 +125,12 @@ const HeroSection = () => {
               <Button 
                 size="lg" 
                 className="bg-gradient-to-r from-accent to-accent/90 hover:from-accent/90 hover:to-accent/80 text-accent-foreground font-medium group shadow-lg hover:shadow-xl transition-all duration-300"
+                onClick={() => {
+                  const element = document.getElementById('solucoes');
+                  if (element) {
+                    element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  }
+                }}
               >
                 Explorar Soluções
                 <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
@@ -133,6 +139,12 @@ const HeroSection = () => {
                 variant="outline" 
                 size="lg"
                 className="border-border/60 hover:bg-accent/5 hover:border-accent/30 backdrop-blur-sm transition-all duration-300"
+                onClick={() => {
+                  const element = document.getElementById('contacto');
+                  if (element) {
+                    element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  }
+                }}
               >
                 Falar Connosco
               </Button>

@@ -11,10 +11,18 @@ const Index = () => {
       <Header />
       
       <main>
-        <HeroSection />
-        <SolutionsGrid />
-        <AboutSection />
-        <ContactSection />
+        <section id="home">
+          <HeroSection />
+        </section>
+        <section id="solucoes">
+          <SolutionsGrid />
+        </section>
+        <section id="sobre">
+          <AboutSection />
+        </section>
+        <section id="contacto">
+          <ContactSection />
+        </section>
       </main>
       
       {/* Footer */}
