@@ -15,6 +15,13 @@ const badgeVariants = cva(
         destructive:
           "border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80",
         outline: "text-foreground",
+        // Status variants para as soluções
+        teste: "border-status-teste/30 bg-status-teste/20 text-status-teste",
+        prototipo: "border-status-prototipo/30 bg-status-prototipo/20 text-status-prototipo", 
+        parceria: "border-status-parceria/30 bg-status-parceria/20 text-status-parceria",
+        live: "border-status-live/30 bg-status-live/20 text-status-live",
+        conceito: "border-status-conceito/30 bg-status-conceito/20 text-status-conceito",
+        usuarios: "border-status-usuarios/30 bg-status-usuarios/20 text-status-usuarios",
       },
     },
     defaultVariants: {
