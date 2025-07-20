@@ -138,3 +138,51 @@ Cores inspiradas no logo da DrakoYuda para uma experiência imersiva
     overflow: hidden;
   }
 }
+
+/* Demo-ready enhancements */
+.highlight-section {
+  background: linear-gradient(90deg, transparent, hsl(var(--accent) / 0.1), transparent);
+  transition: background 0.5s ease;
+}
+
+.interactive-element {
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.interactive-element:hover {
+  transform: scale(1.02);
+  filter: brightness(1.05);
+}
+
+.solution-card {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.solution-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px -3px hsl(var(--foreground) / 0.1);
+}
+
+.touch-target {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+  .solution-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .hero-metrics {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .admin-panel {
+    padding: 1rem;
+    font-size: 0.9rem;
+  }
+}

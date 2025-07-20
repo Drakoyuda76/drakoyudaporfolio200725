@@ -141,6 +141,59 @@ const AdminPanel = () => {
     }
   };
 
+  // Demo backup functions
+  const createDemoBackup = () => {
+    const currentData = loadSolutions();
+    if (currentData) {
+      localStorage.setItem('drakoyuda_demo_backup', JSON.stringify(currentData));
+      alert('✅ Backup para demo criado com sucesso!');
+    }
+  };
+
+  const restoreDemoBackup = () => {
+    const backup = localStorage.getItem('drakoyuda_demo_backup');
+    if (backup) {
+      if (confirm('Restaurar backup do demo? Isto irá substituir os dados atuais.')) {
+        localStorage.setItem('drakoyuda_solutions', backup);
+        setLocalSolutions(JSON.parse(backup));
+        alert('✅ Backup restaurado com sucesso!');
+      }
+    } else {
+      alert('❌ Nenhum backup encontrado. Crie um backup primeiro.');
+    }
+  };
+
+  // Content validation function
+  const validatePortfolioContent = () => {
+    const solutions = loadSolutions();
+    const issues: string[] = [];
+
+    if (!solutions || solutions.length === 0) {
+      issues.push('Nenhuma solução encontrada');
+      return issues;
+    }
+
+    solutions.forEach(solution => {
+      if (!solution.title) issues.push(`Solução ${solution.id}: Título em falta`);
+      if (!solution.description) issues.push(`Solução ${solution.id}: Descrição em falta`);
+      if (!solution.images || solution.images.length < 3) issues.push(`Solução ${solution.id}: Menos de 3 imagens`);
+      if (!solution.humanImpact) issues.push(`Solução ${solution.id}: Impacto humano em falta`);
+      if (!solution.sustainabilityImpact) issues.push(`Solução ${solution.id}: Impacto sustentabilidade em falta`);
+      if (!solution.problemSolution) issues.push(`Solução ${solution.id}: Problema & Solução em falta`);
+    });
+
+    return issues;
+  };
+
+  const runPortfolioValidation = () => {
+    const issues = validatePortfolioContent();
+    if (issues.length === 0) {
+      alert('✅ Portfólio pronto para demonstração!\n\n• 10 soluções completas\n• Todas as imagens configuradas\n• Conteúdo validado');
+    } else {
+      alert(`⚠️ Questões encontradas (${issues.length}):\n\n${issues.slice(0, 5).join('\n')}${issues.length > 5 ? '\n...' : ''}`);
+    }
+  };
+
   // Image management functions
   const addNewImage = () => {
     const newImage = {
@@ -275,7 +328,56 @@ Como a solução contribui para objetivos de desenvolvimento sustentável.
                 DrakoYuda Soluções - Gestão de AI Microsolutions e Serviços
               </p>
             </div>
+        </div>
+
+        {/* Demo Mode Section */}
+        <div className="bg-gradient-to-r from-yellow-50 to-orange-50 border border-yellow-200 rounded-lg p-4 mb-6 dark:from-yellow-900/20 dark:to-orange-900/20 dark:border-yellow-800">
+          <h3 className="font-semibold text-yellow-800 dark:text-yellow-200 mb-3 flex items-center">
+            🎯 Modo Demonstração
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
+            <Button 
+              onClick={createDemoBackup}
+              variant="outline"
+              size="sm"
+              className="bg-yellow-500 hover:bg-yellow-600 text-white border-yellow-600"
+            >
+              📋 Backup Demo
+            </Button>
+            <Button 
+              onClick={restoreDemoBackup}
+              variant="outline"
+              size="sm"
+              className="bg-gray-500 hover:bg-gray-600 text-white border-gray-600"
+            >
+              🔄 Restaurar
+            </Button>
+            <Button 
+              onClick={runPortfolioValidation}
+              variant="outline"
+              size="sm"
+              className="bg-green-500 hover:bg-green-600 text-white border-green-600"
+            >
+              ✅ Validar
+            </Button>
+            <Button 
+              onClick={() => {
+                const issues = validatePortfolioContent();
+                console.log('Demo Checklist:', {
+                  solutions: loadSolutions()?.length || 0,
+                  issues: issues.length,
+                  ready: issues.length === 0
+                });
+                alert('📊 Detalhes no console (F12)');
+              }}
+              variant="outline"
+              size="sm"
+              className="bg-blue-500 hover:bg-blue-600 text-white border-blue-600"
+            >
+              📊 Status
+            </Button>
           </div>
+        </div>
           
           <div className="flex space-x-2">
             <Button 

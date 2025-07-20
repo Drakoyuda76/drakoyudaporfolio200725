@@ -5,6 +5,19 @@ import { Badge } from '@/components/ui/badge';
 import { calculateTotalMetrics, calculateBusinessAreaStats, calculateSDGStats } from '@/data/solutions';
 import heroBanner from '@/assets/hero-banner.jpg';
 
+// Demo Indicator Component
+const DemoIndicator = () => (
+  <div className="bg-accent/10 border border-accent/20 rounded-lg p-4 mb-8 animate-fade-in">
+    <div className="flex items-center space-x-2">
+      <Lightbulb className="h-5 w-5 text-accent" />
+      <p className="text-sm text-foreground">
+        <strong>Demo Interativo:</strong> Explore as soluções da DrakoYuda clicando nas cartas abaixo. 
+        Cada solução mostra impacto real e métricas detalhadas.
+      </p>
+    </div>
+  </div>
+);
+
 const HeroSection = () => {
   const [currentMetric, setCurrentMetric] = useState(0);
   const [animatedValues, setAnimatedValues] = useState({
@@ -245,6 +258,9 @@ const HeroSection = () => {
             </div>
           </div>
         </div>
+        
+        {/* Demo Indicator */}
+        <DemoIndicator />
       </div>
     </section>
   );
