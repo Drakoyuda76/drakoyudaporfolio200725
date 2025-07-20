@@ -141,6 +141,118 @@ const AdminPanel = () => {
     }
   };
 
+  // Image management functions
+  const addNewImage = () => {
+    const newImage = {
+      id: `img-${Date.now()}`,
+      title: `Nova imagem ${(formData.images?.length || 0) + 1}`,
+      description: 'Descrição da nova imagem',
+      colorScheme: 'from-gray-600 to-gray-700'
+    };
+    setFormData(prev => ({
+      ...prev,
+      images: [...(prev.images || []), newImage]
+    }));
+  };
+
+  const updateImageField = (index: number, field: string, value: string) => {
+    setFormData(prev => ({
+      ...prev,
+      images: prev.images?.map((img, i) => 
+        i === index ? { ...img, [field]: value } : img
+      ) || []
+    }));
+  };
+
+  const removeImage = (index: number) => {
+    setFormData(prev => ({
+      ...prev,
+      images: prev.images?.filter((_, i) => i !== index) || []
+    }));
+  };
+
+  // Markdown template download function
+  const downloadMarkdownTemplate = () => {
+    const template = `# Template para Nova Solução DrakoYuda
+
+## Informações Básicas
+**ID:** nova-solucao-id
+**Nome:** Nome da Solução
+**Tagline:** Descrição curta e impactante
+**Status:** [teste-convite|prototipo|parceria|teste-usuarios|conceito|live]
+
+## Descrição
+Descrição detalhada da solução, seus objetivos e funcionalidades principais.
+
+## Áreas de Negócio Impactadas
+- front-office
+- back-office
+- produtos-servicos
+- capacidades-core
+
+## Problema & Solução
+Descrição do problema que a solução resolve e como ela o aborda.
+
+## Impacto Humano
+Como a solução impacta positivamente as pessoas e comunidades.
+
+## Impacto & Sustentabilidade
+Como a solução contribui para objetivos de desenvolvimento sustentável.
+
+## ODS Alinhados
+- 4 (Educação de Qualidade)
+- 8 (Trabalho Decente e Crescimento Económico)
+- 9 (Indústria, Inovação e Infraestruturas)
+- 10 (Redução das Desigualdades)
+- 11 (Cidades e Comunidades Sustentáveis)
+
+## Métricas de Impacto
+**Horas Poupadas:** 0
+**Utilizadores Impactados:** 0
+
+## Imagens (Representação Visual)
+**Imagem 1:**
+- Descrição: Descrição da primeira imagem
+- Cor: from-blue-600 to-blue-700
+
+**Imagem 2:**
+- Descrição: Descrição da segunda imagem
+- Cor: from-green-600 to-green-700
+
+**Imagem 3:**
+- Descrição: Descrição da terceira imagem
+- Cor: from-purple-600 to-purple-700
+
+---
+
+## INSTRUÇÕES DE PREENCHIMENTO:
+
+1. **ID**: Use apenas letras minúsculas, números e hífens
+2. **Status**: Escolha um dos 6 status disponíveis
+3. **Áreas de Negócio**: Selecione uma ou mais áreas relevantes
+4. **ODS**: Indique quais ODS a solução contribui
+5. **Métricas**: Use números inteiros para horas e utilizadores
+6. **Cores**: Use gradientes Tailwind válidos
+
+## CAMPOS OBRIGATÓRIOS:
+- ✅ ID, Nome, Tagline, Status, Descrição
+- ✅ Pelo menos uma área de negócio
+- ✅ Problema & Solução, Impacto Humano
+- ✅ Pelo menos um ODS alinhado
+- ✅ Métricas de impacto (podem ser 0 para conceitos)
+`;
+
+    const blob = new Blob([template], { type: 'text/markdown' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'template-nova-solucao-drakoyuda.md';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div className="min-h-screen bg-background p-6">
       <div className="container max-w-6xl">
@@ -166,6 +278,14 @@ const AdminPanel = () => {
           </div>
           
           <div className="flex space-x-2">
+            <Button 
+              onClick={downloadMarkdownTemplate}
+              variant="outline"
+              className="flex items-center space-x-2"
+            >
+              <FileText className="h-4 w-4" />
+              <span>Template MD</span>
+            </Button>
             <Button 
               variant="outline"
               onClick={handleExportData}
@@ -317,6 +437,64 @@ const AdminPanel = () => {
                     onChange={(e) => setFormData(prev => ({ ...prev, usersImpacted: parseInt(e.target.value) || 0 }))}
                   />
                 </div>
+              </div>
+
+              {/* Image Management Section */}
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <Label>Gestão de Imagens</Label>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={addNewImage}
+                  >
+                    + Adicionar Imagem
+                  </Button>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {formData.images?.map((image, index) => (
+                    <div key={image.id} className="border rounded-lg p-4 space-y-3">
+                      <div 
+                        className="w-full h-24 rounded-md flex items-center justify-center text-white text-sm font-medium"
+                        style={{ background: image.colorScheme }}
+                      >
+                        Imagem {index + 1}
+                      </div>
+                      <Input
+                        placeholder="Título da imagem"
+                        value={image.title || ''}
+                        onChange={(e) => updateImageField(index, 'title', e.target.value)}
+                      />
+                      <Input
+                        placeholder="Descrição da imagem"
+                        value={image.description || ''}
+                        onChange={(e) => updateImageField(index, 'description', e.target.value)}
+                      />
+                      <Input
+                        placeholder="Gradiente (ex: from-blue-600 to-blue-700)"
+                        value={image.colorScheme || ''}
+                        onChange={(e) => updateImageField(index, 'colorScheme', e.target.value)}
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => removeImage(index)}
+                        className="w-full text-red-600 hover:text-red-700"
+                      >
+                        Remover
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+                
+                {(!formData.images || formData.images.length === 0) && (
+                  <div className="text-center py-8 text-muted-foreground">
+                    <p>Nenhuma imagem adicionada ainda</p>
+                  </div>
+                )}
               </div>
 
               <div>

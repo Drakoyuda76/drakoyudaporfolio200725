@@ -14,6 +14,30 @@ const SolutionDetail = () => {
   const solutions = getSolutions();
   const solution = solutions.find(s => s.id === id);
 
+  // Safe date formatting function
+  const formatDate = (dateValue: string | Date | undefined) => {
+    if (!dateValue) return 'Data não disponível';
+    
+    try {
+      // Handle both string and Date object cases
+      const date = typeof dateValue === 'string' ? new Date(dateValue) : dateValue;
+      
+      // Validate date is valid
+      if (isNaN(date.getTime())) {
+        return 'Data inválida';
+      }
+      
+      return date.toLocaleDateString('pt-AO', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+    } catch (error) {
+      console.error('Date formatting error:', error);
+      return 'Data não disponível';
+    }
+  };
+
   if (!solution) {
     return (
       <div className="min-h-screen bg-background">
@@ -210,7 +234,7 @@ const SolutionDetail = () => {
 
                 <div className="text-center">
                   <p className="text-xs text-muted-foreground">
-                    Última atualização: {solution.updatedAt.toLocaleDateString('pt-AO')}
+                    Última atualização: {formatDate(solution.updatedAt)}
                   </p>
                 </div>
               </CardContent>
