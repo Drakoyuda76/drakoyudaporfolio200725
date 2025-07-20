@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Menu, X, Brain, Users, Target } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import PinModal from '@/components/admin/PinModal';
-import drakoLogo from '@/assets/drakoyuda-logo.png';
+import drakoLogo from '@/assets/drakoyuda_simbolo.png';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
