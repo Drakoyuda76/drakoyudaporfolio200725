@@ -1,11 +1,27 @@
-import { Solution, ImpactMetrics } from '@/types/solution';
+import { Solution, ImpactMetrics, SDGAlignment, BusinessAreaStats, BusinessArea } from '@/types/solution';
 
 export const impactMetrics: ImpactMetrics = {
   totalHoursSaved: 8247,
-  totalUsers: 1250,
+  totalUsers: 1826,
   activeSolutions: 12,
   partnerships: 8,
+  errorReduction: 85,
+  responseTimeReduction: 40,
+  communitiesImpacted: 15,
+  financialLiteracyIncrease: 67,
 };
+
+export const sdgData: SDGAlignment[] = [
+  { goal: 1, title: 'Erradicação da Pobreza', solutionsCount: 0 },
+  { goal: 3, title: 'Saúde e Bem-Estar', solutionsCount: 0 },
+  { goal: 4, title: 'Educação de Qualidade', solutionsCount: 0 },
+  { goal: 8, title: 'Trabalho Digno e Crescimento Económico', solutionsCount: 0 },
+  { goal: 9, title: 'Indústria, Inovação e Infraestrutura', solutionsCount: 0 },
+  { goal: 10, title: 'Redução das Desigualdades', solutionsCount: 0 },
+  { goal: 11, title: 'Cidades e Comunidades Sustentáveis', solutionsCount: 0 },
+  { goal: 13, title: 'Ação Climática', solutionsCount: 0 },
+  { goal: 16, title: 'Paz, Justiça e Instituições Eficazes', solutionsCount: 0 },
+];
 
 export const solutions: Solution[] = [
   {
@@ -186,4 +202,52 @@ export const getBusinessAreaLabel = (area: string): string => {
     'products-services': 'Products & Services',
   };
   return labels[area as keyof typeof labels] || area;
+};
+
+// Calculate dynamic metrics from solutions data
+export const calculateBusinessAreaStats = (): BusinessAreaStats[] => {
+  const businessAreas: BusinessArea[] = ['front-office', 'back-office', 'core-capabilities', 'products-services'];
+  
+  return businessAreas.map(area => {
+    const solutionsCount = solutions.filter(solution => 
+      solution.businessAreaImpact.includes(area)
+    ).length;
+    
+    return {
+      area,
+      label: getBusinessAreaLabel(area),
+      solutionsCount
+    };
+  });
+};
+
+export const calculateSDGStats = (): SDGAlignment[] => {
+  const sdgCounts: { [key: number]: number } = {};
+  
+  solutions.forEach(solution => {
+    solution.sdgGoals.forEach(goal => {
+      sdgCounts[goal] = (sdgCounts[goal] || 0) + 1;
+    });
+  });
+  
+  return sdgData.map(sdg => ({
+    ...sdg,
+    solutionsCount: sdgCounts[sdg.goal] || 0
+  })).filter(sdg => sdg.solutionsCount > 0);
+};
+
+export const calculateTotalMetrics = () => {
+  const totalHoursSaved = solutions.reduce((total, solution) => total + solution.timesSaved, 0);
+  const totalUsersImpacted = solutions.reduce((total, solution) => total + solution.usersImpacted, 0);
+  const communitiesImpacted = Math.floor(totalUsersImpacted / 100); // Estimate communities based on users
+  
+  return {
+    totalHoursSaved,
+    totalUsersImpacted,
+    communitiesImpacted,
+    activeSolutions: solutions.length,
+    errorReduction: impactMetrics.errorReduction || 85,
+    responseTimeReduction: impactMetrics.responseTimeReduction || 40,
+    financialLiteracyIncrease: impactMetrics.financialLiteracyIncrease || 67,
+  };
 };

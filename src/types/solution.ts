@@ -42,4 +42,20 @@ export interface ImpactMetrics {
   totalUsers: number;
   activeSolutions: number;
   partnerships: number;
+  errorReduction?: number;
+  responseTimeReduction?: number;
+  communitiesImpacted?: number;
+  financialLiteracyIncrease?: number;
+}
+
+export interface SDGAlignment {
+  goal: number;
+  title: string;
+  solutionsCount: number;
+}
+
+export interface BusinessAreaStats {
+  area: BusinessArea;
+  label: string;
+  solutionsCount: number;
 }

@@ -1,11 +1,14 @@
 import { useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Menu, X, Brain, Users, Target } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import PinModal from '@/components/admin/PinModal';
 import drakoLogo from '@/assets/drakoyuda-logo.png';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [showPinModal, setShowPinModal] = useState(false);
+  const navigate = useNavigate();
   const location = useLocation();
 
   const navItems = [
@@ -23,22 +26,23 @@ const Header = () => {
     <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-16 items-center justify-between">
         {/* Logo */}
-        <Link to="/" className="flex items-center space-x-3 group">
+        <div className="flex items-center space-x-3 group">
           <div className="relative">
             <img 
               src={drakoLogo} 
               alt="DrakoYuda Soluções" 
-              className="h-10 w-10 transition-transform duration-300 group-hover:scale-110"
+              className="h-10 w-10 transition-transform duration-300 group-hover:scale-110 cursor-pointer"
+              onClick={() => setShowPinModal(true)}
             />
             <div className="absolute inset-0 bg-accent/20 rounded-full scale-0 group-hover:scale-125 transition-transform duration-300" />
           </div>
           <div className="hidden sm:block">
             <h1 className="font-tomorrow font-semibold text-lg text-foreground">
-              DrakoYuda
+              DrakoYuda Soluções
             </h1>
-            <p className="text-xs text-muted-foreground -mt-1">Soluções IA</p>
+            <p className="text-xs text-muted-foreground -mt-1">AI Microsolutions e Serviços</p>
           </div>
-        </Link>
+        </div>
 
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center space-x-8">
@@ -117,6 +121,12 @@ const Header = () => {
           </nav>
         </div>
       )}
+      
+      <PinModal
+        isOpen={showPinModal}
+        onClose={() => setShowPinModal(false)}
+        onSuccess={() => navigate('/admin')}
+      />
     </header>
   );
 };
