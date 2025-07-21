@@ -10,44 +10,64 @@ Cores inspiradas no logo da DrakoYuda para uma experiência imersiva
 
 @layer base {
   :root {
-    /* DrakoYuda Light Mode Palette - Futuristic Grayscale */
-    --background: 0 0% 97%; /* #F8F8F8 - Light sophisticated gray */
-    --foreground: 0 0% 16%; /* #2A2A2A - Dark gray for text */
+    /* DrakoYuda Light Mode Palette - Sophisticated Earth Tones */
+    --background: 37 28% 97%; /* Warm white #FEFCFA */
+    --foreground: 27 32% 16%; /* Rich dark brown #2A241C */
 
-    --card: 0 0% 87%; /* #DEDEDE - Medium gray cards */
-    --card-foreground: 0 0% 25%; /* #404040 - Dark gray text on cards */
+    --card: 45 25% 95%; /* Soft cream #F7F5F2 */
+    --card-foreground: 27 32% 25%; /* Warm dark #403931 */
 
-    --popover: 0 0% 87%;
-    --popover-foreground: 0 0% 25%;
+    --popover: 45 25% 95%;
+    --popover-foreground: 27 32% 25%;
 
-    --primary: 0 0% 25%; /* #404040 - Dark gray primary */
-    --primary-foreground: 0 0% 97%;
+    --primary: 142 41% 35%; /* Forest green #3D8B3D */
+    --primary-foreground: 37 28% 97%;
 
-    --secondary: 0 0% 85%; /* #D9D9D9 - Light gray secondary */
-    --secondary-foreground: 0 0% 25%;
+    --secondary: 35 35% 70%; /* Warm earth #C49967 */
+    --secondary-foreground: 27 32% 16%;
 
-    --muted: 0 0% 85%;
-    --muted-foreground: 0 0% 45%; /* #737373 - Medium gray for muted text */
+    --muted: 45 25% 90%;
+    --muted-foreground: 27 15% 45%; /* Medium brown #786B63 */
 
-    --accent: 217 76% 48%; /* Blue accent - keeping DrakoYuda colors */
-    --accent-foreground: 0 0% 97%;
+    --accent: 142 41% 45%; /* Forest green accent #4A9D4A */
+    --accent-foreground: 37 28% 97%;
 
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 0 0% 97%;
+    --destructive: 0 75% 55%; /* Strategic crimson #DC2626 */
+    --destructive-foreground: 37 28% 97%;
 
-    --border: 0 0% 75%; /* #C0C0C0 - Light border */
-    --input: 0 0% 90%; /* #E6E6E6 - Input background */
-    --ring: 217 76% 48%; /* Accent color for focus rings */
+    --border: 45 25% 85%; /* Soft earth border #E7E1D8 */
+    --input: 45 25% 92%; /* Light cream input #F2EDE4 */
+    --ring: 142 41% 45%; /* Forest green focus rings */
 
     --radius: 0.75rem;
 
-    /* Status Colors - Cores para badges de status */
-    --status-teste: 217 76% 48%; /* Azul - Teste por Convite */
-    --status-prototipo: 271 76% 53%; /* Roxo - Protótipo */
-    --status-parceria: 142 71% 45%; /* Verde - Pronto para Parceria */
-    --status-live: 174 62% 47%; /* Teal - Live */
-    --status-conceito: 220 9% 46%; /* Cinza - Conceito */
-    --status-teste-usuarios: 43 96% 56%; /* Laranja - Teste de Utilizadores */
+    /* Premium Status Colors - Sophisticated Earth Palette */
+    --status-teste: 217 76% 48%; /* Blue - Test Invite */
+    --status-prototipo: 271 45% 50%; /* Deep purple - Prototype */
+    --status-parceria: 142 41% 45%; /* Forest green - Partnership */
+    --status-live: 157 45% 45%; /* Forest teal - Live */
+    --status-conceito: 27 20% 50%; /* Sophisticated brown - Concept */
+    --status-teste-usuarios: 35 70% 55%; /* Warm orange - User Testing */
+
+    /* New Earth Tone Variables */
+    --forest-50: 140 40% 96%;
+    --forest-500: 142 41% 45%;
+    --forest-600: 142 45% 35%;
+    --forest-700: 142 50% 25%;
+    
+    --earth-50: 45 40% 96%;
+    --earth-400: 35 35% 70%;
+    --earth-500: 35 45% 55%;
+    --earth-600: 35 50% 45%;
+    
+    --crimson-500: 0 75% 55%;
+    --crimson-600: 0 80% 45%;
+    
+    --stone-50: 37 15% 97%;
+    --stone-100: 37 20% 93%;
+    --stone-400: 27 15% 65%;
+    --stone-600: 27 25% 45%;
+    --stone-800: 27 32% 25%;
 
     /* Gradients */
     --gradient-hero: linear-gradient(135deg, hsl(var(--background)), hsl(var(--card)));
@@ -79,34 +99,48 @@ Cores inspiradas no logo da DrakoYuda para uma experiência imersiva
   }
 
   .dark {
-    /* DrakoYuda Dark Mode Palette - Original Design */
-    --background: 15 15 8%; /* #1A1A1A - Deep dark gray */
-    --foreground: 60 7% 91%; /* #EDEDE8 - Light gray for text */
+    /* DrakoYuda Dark Mode Palette - Sophisticated Dark Earth */
+    --background: 27 35% 8%; /* Deep warm black #1C1917 */
+    --foreground: 37 15% 90%; /* Warm light #E8E3DF */
 
-    --card: 18 18 11%; /* #1F1F1E - Dark card background */
-    --card-foreground: 60 6% 88%; /* #E1E1DF - Light text on cards */
+    --card: 27 30% 12%; /* Dark warm card #292524 */
+    --card-foreground: 37 15% 85%; /* Warm light text #DDD6CF */
 
-    --popover: 18 18 11%;
-    --popover-foreground: 60 6% 88%;
+    --popover: 27 30% 12%;
+    --popover-foreground: 37 15% 85%;
 
-    --primary: 60 6% 88%; /* #E1E1DF - Light primary */
-    --primary-foreground: 15 15 8%;
+    --primary: 142 35% 55%; /* Muted forest green #6CB96C */
+    --primary-foreground: 27 35% 8%;
 
-    --secondary: 18 18 11%; /* #1F1F1E - Dark secondary */
-    --secondary-foreground: 60 6% 88%;
+    --secondary: 27 30% 15%; /* Dark warm secondary #44403C */
+    --secondary-foreground: 37 15% 85%;
 
-    --muted: 18 18 11%;
-    --muted-foreground: 60 6% 75%; /* #C9C9C0 - Muted text */
+    --muted: 27 30% 15%;
+    --muted-foreground: 37 10% 65%; /* Warm muted #A8A29E */
 
-    --accent: 217 76% 48%; /* Blue accent - keeping DrakoYuda colors */
-    --accent-foreground: 60 7% 91%;
+    --accent: 142 35% 55%; /* Forest green accent */
+    --accent-foreground: 27 35% 8%;
 
-    --destructive: 0 84% 60%;
-    --destructive-foreground: 60 7% 91%;
+    --destructive: 0 75% 60%; /* Warm crimson */
+    --destructive-foreground: 37 15% 90%;
 
-    --border: 18 18 11%; /* Dark border */
-    --input: 18 18 11%; /* Dark input background */
-    --ring: 60 6% 88%; /* Light ring color */
+    --border: 27 30% 20%; /* Dark warm border #57534E */
+    --input: 27 30% 18%; /* Dark input #4A453F */
+    --ring: 142 35% 55%; /* Forest green ring */
+    
+    /* Dark mode earth tone overrides */
+    --forest-500: 142 35% 55%;
+    --forest-600: 142 40% 45%;
+    --forest-700: 142 45% 35%;
+    
+    --earth-400: 35 25% 60%;
+    --earth-500: 35 30% 50%;
+    --earth-600: 35 35% 40%;
+    
+    --stone-100: 27 20% 20%;
+    --stone-400: 27 15% 50%;
+    --stone-600: 27 20% 35%;
+    --stone-800: 27 25% 15%;
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
     --sidebar-primary: 224.3 76.3% 48%;
@@ -139,7 +173,7 @@ Cores inspiradas no logo da DrakoYuda para uma experiência imersiva
   }
 }
 
-/* Demo-ready enhancements */
+/* Premium UI Enhancements */
 .highlight-section {
   background: linear-gradient(90deg, transparent, hsl(var(--accent) / 0.1), transparent);
   transition: background 0.5s ease;
@@ -147,7 +181,7 @@ Cores inspiradas no logo da DrakoYuda para uma experiência imersiva
 
 .interactive-element {
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .interactive-element:hover {
@@ -162,6 +196,73 @@ Cores inspiradas no logo da DrakoYuda para uma experiência imersiva
 .solution-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 10px 25px -3px hsl(var(--foreground) / 0.1);
+}
+
+/* Premium Button Variants */
+.btn-primary {
+  @apply bg-gradient-to-r from-forest-600 to-forest-700 hover:from-forest-700 hover:to-forest-800 text-white;
+}
+
+.btn-secondary {
+  @apply bg-gradient-to-r from-earth-500 to-earth-600 hover:from-earth-600 hover:to-earth-700 text-white;
+}
+
+.btn-crimson {
+  @apply bg-gradient-to-r from-crimson-500 to-crimson-600 hover:from-crimson-600 hover:to-crimson-700 text-white;
+}
+
+/* Glass Morphism Effects */
+.glass {
+  @apply backdrop-blur-xl bg-white/80 dark:bg-stone-900/80 border border-stone-200/50 dark:border-stone-700/50;
+}
+
+.glass-card {
+  @apply backdrop-blur-lg bg-white/60 dark:bg-stone-800/60 border border-stone-200/30 dark:border-stone-700/30;
+}
+
+/* 3D Card Effects */
+.card-3d {
+  transform-style: preserve-3d;
+  transition: transform 0.3s ease;
+}
+
+.card-3d:hover {
+  transform: rotateX(5deg) rotateY(5deg);
+}
+
+/* Magnetic Button Effect */
+.magnetic-button {
+  transition: transform 0.3s ease-out;
+}
+
+/* Parallax Elements */
+.parallax-slow {
+  will-change: transform;
+}
+
+/* Status Badge Enhancements */
+.status-live { 
+  @apply bg-gradient-to-r from-forest-500 to-forest-600 text-white shadow-lg; 
+}
+
+.status-parceria { 
+  @apply bg-gradient-to-r from-earth-500 to-earth-600 text-white shadow-lg; 
+}
+
+.status-teste-usuarios { 
+  @apply bg-gradient-to-r from-yellow-500 to-orange-500 text-white shadow-lg; 
+}
+
+.status-prototipo { 
+  @apply bg-gradient-to-r from-purple-500 to-violet-600 text-white shadow-lg; 
+}
+
+.status-conceito { 
+  @apply bg-gradient-to-r from-stone-400 to-stone-600 text-white shadow-lg; 
+}
+
+.status-teste { 
+  @apply bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg; 
 }
 
 .touch-target {

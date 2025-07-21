@@ -1,11 +1,9 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Filter, ArrowRight, Clock, Users } from 'lucide-react';
+import { Filter } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { getSolutions, getStatusLabel, getStatusColor, getBusinessAreaLabel } from '@/data/solutions';
+import { getSolutions, getStatusLabel, getBusinessAreaLabel } from '@/data/solutions';
+import SolutionCard from '@/components/ui/solution-card';
 import type { SolutionStatus, BusinessArea } from '@/types/solution';
 
 const SolutionsGrid = () => {
@@ -74,67 +72,14 @@ const SolutionsGrid = () => {
           </div>
         </div>
 
-        {/* Solutions Grid */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {/* Solutions Grid - Modern Card Layout */}
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
           {filteredSolutions.map((solution, index) => (
-            <Card 
-              key={solution.id} 
-              className="group hover:shadow-hover transition-all duration-300 border-border/40 bg-card/50 hover:bg-card/80 animate-fade-in"
-              style={{ animationDelay: `${index * 100}ms` }}
-            >
-              <CardHeader className="space-y-3">
-                <div className="flex items-start justify-between">
-                  <Badge 
-                    variant={getStatusColor(solution.status) as any}
-                  >
-                    {getStatusLabel(solution.status)}
-                  </Badge>
-                  <div className="flex flex-wrap gap-1">
-                    {solution.businessAreaImpact.slice(0, 2).map(area => (
-                      <Badge key={area} variant="outline" className="text-xs">
-                        {getBusinessAreaLabel(area).split(' ')[0]}
-                      </Badge>
-                    ))}
-                  </div>
-                </div>
-
-                <div>
-                  <CardTitle className="font-tomorrow text-xl text-foreground group-hover:text-accent transition-colors">
-                    {solution.title}
-                  </CardTitle>
-                  <CardDescription className="text-muted-foreground">
-                    {solution.subtitle}
-                  </CardDescription>
-                </div>
-              </CardHeader>
-
-              <CardContent className="space-y-4">
-                <p className="text-sm text-muted-foreground line-clamp-3">
-                  {solution.description}
-                </p>
-
-                <div className="flex items-center justify-between text-xs text-muted-foreground">
-                  <div className="flex items-center space-x-1">
-                    <Clock className="h-3 w-3" />
-                    <span>{solution.timesSaved.toLocaleString()}h poupadas</span>
-                  </div>
-                  <div className="flex items-center space-x-1">
-                    <Users className="h-3 w-3" />
-                    <span>{solution.usersImpacted} utilizadores</span>
-                  </div>
-                </div>
-
-                <Link to={`/solucoes/${solution.id}`}>
-                  <Button 
-                    variant="outline" 
-                    className="w-full group/btn border-accent/30 text-accent hover:bg-accent/10"
-                  >
-                    Saber Mais
-                    <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover/btn:translate-x-1" />
-                  </Button>
-                </Link>
-              </CardContent>
-            </Card>
+            <SolutionCard
+              key={solution.id}
+              solution={solution}
+              index={index}
+            />
           ))}
         </div>
 
