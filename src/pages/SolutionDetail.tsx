@@ -33,7 +33,9 @@ const SolutionDetail = () => {
         day: 'numeric'
       });
     } catch (error) {
-      console.error('Date formatting error:', error);
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Date formatting error:', error);
+      }
       return 'Data não disponível';
     }
   };

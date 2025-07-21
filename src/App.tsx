@@ -7,6 +7,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { ErrorBoundary } from "react-error-boundary";
+import { HelmetProvider } from 'react-helmet-async';
 import ScrollToTop from "@/components/ui/scroll-to-top";
 import ChatAssistant from "@/components/ui/chat-assistant";
 import HomePage from "./pages/HomePage";
@@ -67,12 +68,13 @@ function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider>
-        <TooltipProvider>
-          <ErrorBoundary FallbackComponent={ErrorFallback}>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
+      <HelmetProvider>
+        <ThemeProvider>
+          <TooltipProvider>
+            <ErrorBoundary FallbackComponent={ErrorFallback}>
+              <Toaster />
+              <Sonner />
+              <BrowserRouter>
               <Routes>
                 <Route path="/" element={<HomePage />} />
                 <Route path="/solucoes" element={<SolutionsPage />} />
@@ -84,10 +86,11 @@ function App() {
               </Routes>
               <ScrollToTop />
               <ChatAssistant />
-            </BrowserRouter>
-          </ErrorBoundary>
-        </TooltipProvider>
-      </ThemeProvider>
+              </BrowserRouter>
+            </ErrorBoundary>
+          </TooltipProvider>
+        </ThemeProvider>
+      </HelmetProvider>
     </QueryClientProvider>
   );
 }

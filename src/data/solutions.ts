@@ -252,7 +252,9 @@ export const getSolutions = (): Solution[] => {
       solutionsInstance = JSON.parse(savedSolutions);
       return solutionsInstance!;
     } catch (error) {
-      console.error('Failed to parse saved solutions, using real portfolio data');
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Failed to parse saved solutions, using real portfolio data');
+      }
     }
   }
   

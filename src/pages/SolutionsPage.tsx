@@ -1,4 +1,5 @@
 import Header from '@/components/layout/Header';
+import SEOHead from '@/components/SEO/SEOHead';
 import SolutionsGrid from '@/components/home/SolutionsGrid';
 import { ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -6,6 +7,12 @@ import { Link } from 'react-router-dom';
 const SolutionsPage = () => {
   return (
     <div className="min-h-screen bg-background font-tomorrow">
+      <SEOHead
+        title="Soluções de IA"
+        description="Descubra as 10 microsoluções de IA da DrakoYuda: Ana Lista, BotBwala, KendaNet e mais. Soluções desenvolvidas em Angola para resolver desafios locais."
+        keywords="soluções IA angola, microsoluções inteligência artificial, Ana Lista, BotBwala, KendaNet, automação empresarial angola"
+        path="/solucoes"
+      />
       <Header />
       
       <main className="pt-24 pb-16">
@@ -22,10 +29,10 @@ const SolutionsPage = () => {
           </div>
 
           <div className="text-center mb-12">
-            <h1 className="text-4xl font-bold text-foreground mb-4">
+            <h1 className="heading-primary mb-4">
               As Nossas Soluções
             </h1>
-            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+            <p className="body-large max-w-3xl mx-auto">
               Cada solução da DrakoYuda é desenvolvida para resolver desafios reais em Angola, 
               usando inteligência artificial human-cêntrica que coloca as pessoas no centro da inovação.
             </p>
