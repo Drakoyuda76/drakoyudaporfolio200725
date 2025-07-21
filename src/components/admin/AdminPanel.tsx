@@ -1,5 +1,6 @@
+
 import { useState, useEffect } from 'react';
-import { ArrowLeft, Plus, Edit, Trash2, Upload, FileText, Save, X, Download, RefreshCw } from 'lucide-react';
+import { Plus, Edit, Trash2, Upload, FileText, Save, X, Download, RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -10,6 +11,8 @@ import { Badge } from '@/components/ui/badge';
 import { useNavigate } from 'react-router-dom';
 import { getSolutions, getStatusLabel, getStatusColor, updateSolutions } from '@/data/solutions';
 import { saveSolutions, loadSolutions, exportSolutionsAsJSON, clearStorageData } from '@/utils/storage';
+import AdminPanelHeader from './AdminPanelHeader';
+import SolutionRowItem from './SolutionRowItem';
 import type { Solution, SolutionStatus, BusinessArea } from '@/types/solution';
 
 const AdminPanel = () => {
@@ -141,29 +144,6 @@ const AdminPanel = () => {
     }
   };
 
-  // Demo backup functions
-  const createDemoBackup = () => {
-    const currentData = loadSolutions();
-    if (currentData) {
-      localStorage.setItem('drakoyuda_demo_backup', JSON.stringify(currentData));
-      alert('✅ Backup para demo criado com sucesso!');
-    }
-  };
-
-  const restoreDemoBackup = () => {
-    const backup = localStorage.getItem('drakoyuda_demo_backup');
-    if (backup) {
-      if (confirm('Restaurar backup do demo? Isto irá substituir os dados atuais.')) {
-        localStorage.setItem('drakoyuda_solutions', backup);
-        setLocalSolutions(JSON.parse(backup));
-        alert('✅ Backup restaurado com sucesso!');
-      }
-    } else {
-      alert('❌ Nenhum backup encontrado. Crie um backup primeiro.');
-    }
-  };
-
-  // Content validation function
   const validatePortfolioContent = () => {
     const solutions = loadSolutions();
     const issues: string[] = [];
@@ -194,210 +174,23 @@ const AdminPanel = () => {
     }
   };
 
-  // Image management functions
-  const addNewImage = () => {
-    const newImage = {
-      id: `img-${Date.now()}`,
-      title: `Nova imagem ${(formData.images?.length || 0) + 1}`,
-      description: 'Descrição da nova imagem',
-      colorScheme: 'from-gray-600 to-gray-700'
-    };
-    setFormData(prev => ({
-      ...prev,
-      images: [...(prev.images || []), newImage]
-    }));
-  };
-
-  const updateImageField = (index: number, field: string, value: string) => {
-    setFormData(prev => ({
-      ...prev,
-      images: prev.images?.map((img, i) => 
-        i === index ? { ...img, [field]: value } : img
-      ) || []
-    }));
-  };
-
-  const removeImage = (index: number) => {
-    setFormData(prev => ({
-      ...prev,
-      images: prev.images?.filter((_, i) => i !== index) || []
-    }));
-  };
-
-  // Markdown template download function
-  const downloadMarkdownTemplate = () => {
-    const template = `# Template para Nova Solução DrakoYuda
-
-## Informações Básicas
-**ID:** nova-solucao-id
-**Nome:** Nome da Solução
-**Tagline:** Descrição curta e impactante
-**Status:** [teste-convite|prototipo|parceria|teste-usuarios|conceito|live]
-
-## Descrição
-Descrição detalhada da solução, seus objetivos e funcionalidades principais.
-
-## Áreas de Negócio Impactadas
-- front-office
-- back-office
-- produtos-servicos
-- capacidades-core
-
-## Problema & Solução
-Descrição do problema que a solução resolve e como ela o aborda.
-
-## Impacto Humano
-Como a solução impacta positivamente as pessoas e comunidades.
-
-## Impacto & Sustentabilidade
-Como a solução contribui para objetivos de desenvolvimento sustentável.
-
-## ODS Alinhados
-- 4 (Educação de Qualidade)
-- 8 (Trabalho Decente e Crescimento Económico)
-- 9 (Indústria, Inovação e Infraestruturas)
-- 10 (Redução das Desigualdades)
-- 11 (Cidades e Comunidades Sustentáveis)
-
-## Métricas de Impacto
-**Horas Poupadas:** 0
-**Utilizadores Impactados:** 0
-
-## Imagens (Representação Visual)
-**Imagem 1:**
-- Descrição: Descrição da primeira imagem
-- Cor: from-blue-600 to-blue-700
-
-**Imagem 2:**
-- Descrição: Descrição da segunda imagem
-- Cor: from-green-600 to-green-700
-
-**Imagem 3:**
-- Descrição: Descrição da terceira imagem
-- Cor: from-purple-600 to-purple-700
-
----
-
-## INSTRUÇÕES DE PREENCHIMENTO:
-
-1. **ID**: Use apenas letras minúsculas, números e hífens
-2. **Status**: Escolha um dos 6 status disponíveis
-3. **Áreas de Negócio**: Selecione uma ou mais áreas relevantes
-4. **ODS**: Indique quais ODS a solução contribui
-5. **Métricas**: Use números inteiros para horas e utilizadores
-6. **Cores**: Use gradientes Tailwind válidos
-
-## CAMPOS OBRIGATÓRIOS:
-- ✅ ID, Nome, Tagline, Status, Descrição
-- ✅ Pelo menos uma área de negócio
-- ✅ Problema & Solução, Impacto Humano
-- ✅ Pelo menos um ODS alinhado
-- ✅ Métricas de impacto (podem ser 0 para conceitos)
-`;
-
-    const blob = new Blob([template], { type: 'text/markdown' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'template-nova-solucao-drakoyuda.md';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-  };
+  const totalHoursSaved = localSolutions.reduce((sum, solution) => sum + solution.timesSaved, 0);
 
   return (
-    <div className="min-h-screen bg-background p-6">
-      <div className="container max-w-6xl">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <div className="flex items-center space-x-4">
-            <Button 
-              variant="outline" 
-              onClick={() => navigate('/')}
-              className="flex items-center space-x-2"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              <span>Voltar ao Portfólio</span>
-            </Button>
-            <div>
-              <h1 className="font-tomorrow font-semibold text-3xl text-foreground">
-                Painel Administrativo
-              </h1>
-              <p className="text-muted-foreground">
-                DrakoYuda Soluções - Gestão de AI Microsolutions e Serviços
-              </p>
-            </div>
-        </div>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <AdminPanelHeader
+        solutionsCount={localSolutions.length}
+        totalHoursSaved={totalHoursSaved}
+        onValidatePortfolio={runPortfolioValidation}
+        onExportData={handleExportData}
+        onNewSolution={() => {
+          setShowAddForm(true);
+          setEditingId(null);
+          resetForm();
+        }}
+      />
 
-        {/* Demo Controls - Compact */}
-        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="font-semibold text-blue-900 dark:text-blue-100">🎭 Demo Mode</h3>
-              <p className="text-blue-700 dark:text-blue-300 text-sm">
-                {localSolutions.length} soluções • {localSolutions.filter(s => s.status === 'live').length} ativas
-              </p>
-            </div>
-            
-            <div className="flex gap-2">
-              <Button 
-                onClick={createDemoBackup}
-                size="sm"
-                className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1.5"
-              >
-                Backup
-              </Button>
-              <Button 
-                onClick={runPortfolioValidation}
-                size="sm"
-                className="bg-green-500 hover:bg-green-600 text-white px-3 py-1.5"
-              >
-                Validar
-              </Button>
-            </div>
-          </div>
-        </div>
-          
-          <div className="flex space-x-2">
-            <Button 
-              onClick={downloadMarkdownTemplate}
-              variant="outline"
-              className="flex items-center space-x-2"
-            >
-              <FileText className="h-4 w-4" />
-              <span>Template MD</span>
-            </Button>
-            <Button 
-              variant="outline"
-              onClick={handleExportData}
-              className="flex items-center space-x-2"
-            >
-              <Download className="h-4 w-4" />
-              <span>Exportar</span>
-            </Button>
-            <Button 
-              variant="outline"
-              onClick={handleRefreshData}
-              className="flex items-center space-x-2"
-            >
-              <RefreshCw className="h-4 w-4" />
-              <span>Recarregar</span>
-            </Button>
-            <Button 
-              onClick={() => {
-                setShowAddForm(true);
-                setEditingId(null);
-                resetForm();
-              }}
-              className="bg-accent hover:bg-accent/90"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Nova Solução
-            </Button>
-          </div>
-        </div>
-
+      <div className="max-w-7xl mx-auto px-6 py-8">
         {/* Add/Edit Form */}
         {showAddForm && (
           <Card className="mb-8">
@@ -521,78 +314,6 @@ Como a solução contribui para objetivos de desenvolvimento sustentável.
                 </div>
               </div>
 
-              {/* Image Management Section */}
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <Label>Gestão de Imagens</Label>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={addNewImage}
-                  >
-                    + Adicionar Imagem
-                  </Button>
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {formData.images?.map((image, index) => (
-                    <div key={image.id} className="border rounded-lg p-4 space-y-3">
-                      <div 
-                        className="w-full h-24 rounded-md flex items-center justify-center text-white text-sm font-medium"
-                        style={{ background: image.colorScheme }}
-                      >
-                        Imagem {index + 1}
-                      </div>
-                      <Input
-                        placeholder="Título da imagem"
-                        value={image.title || ''}
-                        onChange={(e) => updateImageField(index, 'title', e.target.value)}
-                      />
-                      <Input
-                        placeholder="Descrição da imagem"
-                        value={image.description || ''}
-                        onChange={(e) => updateImageField(index, 'description', e.target.value)}
-                      />
-                      <Input
-                        placeholder="Gradiente (ex: from-blue-600 to-blue-700)"
-                        value={image.colorScheme || ''}
-                        onChange={(e) => updateImageField(index, 'colorScheme', e.target.value)}
-                      />
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => removeImage(index)}
-                        className="w-full text-red-600 hover:text-red-700"
-                      >
-                        Remover
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-                
-                {(!formData.images || formData.images.length === 0) && (
-                  <div className="text-center py-8 text-muted-foreground">
-                    <p>Nenhuma imagem adicionada ainda</p>
-                  </div>
-                )}
-              </div>
-
-              <div>
-                <Label htmlFor="mdImport">Importar Arquivo MD</Label>
-                <div className="flex items-center space-x-2">
-                  <Input
-                    id="mdImport"
-                    type="file"
-                    accept=".md,.markdown"
-                    onChange={handleImportMD}
-                    className="file:mr-2 file:py-1 file:px-3 file:rounded file:border-0 file:bg-accent file:text-accent-foreground"
-                  />
-                  <FileText className="h-4 w-4 text-muted-foreground" />
-                </div>
-              </div>
-
               <div className="flex justify-end space-x-2">
                 <Button 
                   variant="outline" 
@@ -605,7 +326,7 @@ Como a solução contribui para objetivos de desenvolvimento sustentável.
                   <X className="h-4 w-4 mr-2" />
                   Cancelar
                 </Button>
-                <Button onClick={handleSave} className="bg-accent hover:bg-accent/90">
+                <Button onClick={handleSave} className="bg-indigo-500 hover:bg-indigo-600">
                   <Save className="h-4 w-4 mr-2" />
                   Salvar
                 </Button>
@@ -614,59 +335,22 @@ Como a solução contribui para objetivos de desenvolvimento sustentável.
           </Card>
         )}
 
-        {/* Solutions List */}
-        <div className="space-y-4">
-          <h2 className="font-tomorrow font-semibold text-2xl text-foreground">
-            Soluções Cadastradas ({localSolutions.length})
-          </h2>
+        {/* Solutions Management */}
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+          <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
+              Gestão de Soluções
+            </h2>
+          </div>
           
-          <div className="grid gap-4">
+          <div className="divide-y divide-gray-200 dark:divide-gray-700">
             {localSolutions.map((solution) => (
-              <Card key={solution.id} className="hover:shadow-lg transition-shadow">
-                <CardContent className="p-6">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <div className="flex items-center space-x-3 mb-2">
-                        <h3 className="font-tomorrow font-semibold text-lg text-foreground">
-                          {solution.title}
-                        </h3>
-                        <Badge variant={getStatusColor(solution.status) as any}>
-                          {getStatusLabel(solution.status)}
-                        </Badge>
-                      </div>
-                      <p className="text-muted-foreground mb-2">{solution.subtitle}</p>
-                      <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
-                        {solution.description}
-                      </p>
-                      <div className="flex flex-wrap gap-2">
-                        {solution.businessAreaImpact.map(area => (
-                          <Badge key={area} variant="outline" className="text-xs">
-                            {area.replace('-', ' ')}
-                          </Badge>
-                        ))}
-                      </div>
-                    </div>
-                    
-                    <div className="flex space-x-2 ml-4">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleEdit(solution)}
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleDelete(solution.id)}
-                        className="text-destructive hover:bg-destructive/10"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
+              <SolutionRowItem
+                key={solution.id}
+                solution={solution}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+              />
             ))}
           </div>
         </div>
