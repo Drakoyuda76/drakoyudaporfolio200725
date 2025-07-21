@@ -12,7 +12,6 @@ import SolutionDetail from "./pages/SolutionDetail";
 import AdminPanel from "./components/admin/AdminPanel";
 import NotFound from "./pages/NotFound";
 
-// Extend Window interface for session tracking
 declare global {
   interface Window {
     sessionStart: number;
@@ -21,8 +20,7 @@ declare global {
 
 const queryClient = new QueryClient();
 
-const App = () => {
-  // Track session for chat context
+function App() {
   React.useEffect(() => {
     if (!window.sessionStart) {
       window.sessionStart = Date.now();
@@ -41,7 +39,6 @@ const App = () => {
               <Route path="/" element={<Index />} />
               <Route path="/solution/:id" element={<SolutionDetail />} />
               <Route path="/admin" element={<AdminPanel />} />
-              {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
               <Route path="*" element={<NotFound />} />
             </Routes>
             <ScrollToTop />
@@ -51,6 +48,6 @@ const App = () => {
       </ThemeProvider>
     </QueryClientProvider>
   );
-};
+}
 
 export default App;
