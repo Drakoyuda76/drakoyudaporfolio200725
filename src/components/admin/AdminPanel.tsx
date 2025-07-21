@@ -330,52 +330,32 @@ Como a solução contribui para objetivos de desenvolvimento sustentável.
             </div>
         </div>
 
-        {/* Demo Mode Section */}
-        <div className="bg-gradient-to-r from-yellow-50 to-orange-50 border border-yellow-200 rounded-lg p-4 mb-6 dark:from-yellow-900/20 dark:to-orange-900/20 dark:border-yellow-800">
-          <h3 className="font-semibold text-yellow-800 dark:text-yellow-200 mb-3 flex items-center">
-            🎯 Modo Demonstração
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
-            <Button 
-              onClick={createDemoBackup}
-              variant="outline"
-              size="sm"
-              className="bg-yellow-500 hover:bg-yellow-600 text-white border-yellow-600"
-            >
-              📋 Backup Demo
-            </Button>
-            <Button 
-              onClick={restoreDemoBackup}
-              variant="outline"
-              size="sm"
-              className="bg-gray-500 hover:bg-gray-600 text-white border-gray-600"
-            >
-              🔄 Restaurar
-            </Button>
-            <Button 
-              onClick={runPortfolioValidation}
-              variant="outline"
-              size="sm"
-              className="bg-green-500 hover:bg-green-600 text-white border-green-600"
-            >
-              ✅ Validar
-            </Button>
-            <Button 
-              onClick={() => {
-                const issues = validatePortfolioContent();
-                console.log('Demo Checklist:', {
-                  solutions: loadSolutions()?.length || 0,
-                  issues: issues.length,
-                  ready: issues.length === 0
-                });
-                alert('📊 Detalhes no console (F12)');
-              }}
-              variant="outline"
-              size="sm"
-              className="bg-blue-500 hover:bg-blue-600 text-white border-blue-600"
-            >
-              📊 Status
-            </Button>
+        {/* Demo Controls - Compact */}
+        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4 mb-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="font-semibold text-blue-900 dark:text-blue-100">🎭 Demo Mode</h3>
+              <p className="text-blue-700 dark:text-blue-300 text-sm">
+                {localSolutions.length} soluções • {localSolutions.filter(s => s.status === 'live').length} ativas
+              </p>
+            </div>
+            
+            <div className="flex gap-2">
+              <Button 
+                onClick={createDemoBackup}
+                size="sm"
+                className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1.5"
+              >
+                Backup
+              </Button>
+              <Button 
+                onClick={runPortfolioValidation}
+                size="sm"
+                className="bg-green-500 hover:bg-green-600 text-white px-3 py-1.5"
+              >
+                Validar
+              </Button>
+            </div>
           </div>
         </div>
           

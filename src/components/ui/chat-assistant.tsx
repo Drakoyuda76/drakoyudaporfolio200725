@@ -231,7 +231,7 @@ const ChatAssistant = () => {
       <div className="fixed bottom-6 right-6 z-50">
         <Button
           onClick={() => setIsExpanded(true)}
-          className="w-14 h-14 rounded-full bg-accent hover:bg-accent/90 text-accent-foreground shadow-lg hover:shadow-xl transition-all duration-300 animate-pulse hover:animate-none hover:scale-110"
+          className="w-14 h-14 rounded-full bg-accent hover:bg-accent/90 text-accent-foreground shadow-lg hover:shadow-xl transition-all duration-300 hover:scale-110"
           aria-label="Abrir chat assistente"
         >
           <MessageCircle className="h-6 w-6" />

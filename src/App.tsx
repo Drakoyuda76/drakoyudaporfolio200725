@@ -37,7 +37,7 @@ function App() {
           <BrowserRouter>
             <Routes>
               <Route path="/" element={<Index />} />
-              <Route path="/solution/:id" element={<SolutionDetail />} />
+              <Route path="/solucoes/:id" element={<SolutionDetail />} />
               <Route path="/admin" element={<AdminPanel />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
