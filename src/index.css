@@ -186,3 +186,15 @@ Cores inspiradas no logo da DrakoYuda para uma experiência imersiva
     font-size: 0.9rem;
   }
 }
+
+/* Chat Assistant Animations */
+@keyframes pulse {
+  0%, 100% { 
+    transform: scale(1);
+    box-shadow: 0 0 0 0 hsl(var(--accent) / 0.4);
+  }
+  50% { 
+    transform: scale(1.05);
+    box-shadow: 0 0 0 10px hsl(var(--accent) / 0);
+  }
+}
