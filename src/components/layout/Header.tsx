@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Menu, X, Brain, Users, Target } from 'lucide-react';
+import { Menu, X, Brain, Users, Target, Mail } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
 import PinModal from '@/components/admin/PinModal';
@@ -14,8 +14,9 @@ const Header = () => {
 
   const navItems = [
     { href: '/', label: 'Início', icon: Brain, isScroll: false },
-    { href: '#solucoes', label: 'Soluções', icon: Target, isScroll: true },
-    { href: '#sobre', label: 'Sobre Nós', icon: Users, isScroll: true },
+    { href: '/solucoes', label: 'Soluções', icon: Target, isScroll: false },
+    { href: '/sobre', label: 'Sobre Nós', icon: Users, isScroll: false },
+    { href: '/contacto', label: 'Contacto', icon: Mail, isScroll: false },
   ];
 
   const scrollToSection = (sectionId: string) => {
@@ -94,7 +95,7 @@ const Header = () => {
             variant="outline" 
             size="sm"
             className="border-accent/30 text-accent hover:bg-accent/10"
-            onClick={() => scrollToSection('contacto')}
+            onClick={() => navigate('/contacto')}
           >
             Contactar
           </Button>
@@ -139,7 +140,10 @@ const Header = () => {
               <Button 
                 className="w-full justify-center border-accent/30 text-accent hover:bg-accent/10" 
                 variant="outline"
-                onClick={() => scrollToSection('contacto')}
+                onClick={() => {
+                  navigate('/contacto');
+                  setIsMenuOpen(false);
+                }}
               >
                 Contactar
               </Button>

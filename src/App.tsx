@@ -7,6 +7,10 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import ScrollToTop from "@/components/ui/scroll-to-top";
 import ChatAssistant from "@/components/ui/chat-assistant";
+import HomePage from "./pages/HomePage";
+import SolutionsPage from "./pages/SolutionsPage";
+import AboutPage from "./pages/AboutPage";
+import ContactPage from "./pages/ContactPage";
 import Index from "./pages/Index";
 import SolutionDetail from "./pages/SolutionDetail";
 import AdminPanel from "./components/admin/AdminPanel";
@@ -36,8 +40,11 @@ function App() {
           <Sonner />
           <BrowserRouter>
             <Routes>
-              <Route path="/" element={<Index />} />
+              <Route path="/" element={<HomePage />} />
+              <Route path="/solucoes" element={<SolutionsPage />} />
               <Route path="/solucoes/:id" element={<SolutionDetail />} />
+              <Route path="/sobre" element={<AboutPage />} />
+              <Route path="/contacto" element={<ContactPage />} />
               <Route path="/admin" element={<AdminPanel />} />
               <Route path="*" element={<NotFound />} />
             </Routes>

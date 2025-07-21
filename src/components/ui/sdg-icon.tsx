@@ -14,16 +14,25 @@ const SDGIcon: React.FC<SDGIconProps> = ({
   className = "",
   showTooltip = true 
 }) => {
+  // Official UN SDG Colors and Portuguese names
   const sdgData: Record<number, { name: string; color: string; }> = {
     1: { name: "Erradicação da Pobreza", color: "#E5243B" },
+    2: { name: "Fome Zero e Agricultura Sustentável", color: "#DDA63A" },
     3: { name: "Saúde e Bem-Estar", color: "#4C9F38" },
     4: { name: "Educação de Qualidade", color: "#C5192D" },
+    5: { name: "Igualdade de Género", color: "#FF3A21" },
+    6: { name: "Água Potável e Saneamento", color: "#26BDE2" },
+    7: { name: "Energias Renováveis e Acessíveis", color: "#FCC30B" },
     8: { name: "Trabalho Digno e Crescimento Económico", color: "#A21942" },
     9: { name: "Indústria, Inovação e Infraestrutura", color: "#FD6925" },
     10: { name: "Redução das Desigualdades", color: "#DD1367" },
     11: { name: "Cidades e Comunidades Sustentáveis", color: "#FD9D24" },
+    12: { name: "Produção e Consumo Sustentáveis", color: "#BF8B2E" },
     13: { name: "Ação Climática", color: "#3F7E44" },
+    14: { name: "Proteger a Vida Marinha", color: "#0A97D9" },
+    15: { name: "Proteger a Vida Terrestre", color: "#56C02B" },
     16: { name: "Paz, Justiça e Instituições Eficazes", color: "#00689D" },
+    17: { name: "Parcerias para a Implementação dos Objetivos", color: "#19486A" },
   };
 
   const sdg = sdgData[sdgNumber];
