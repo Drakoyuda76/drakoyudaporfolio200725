@@ -55,6 +55,30 @@ export default {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))'
 				},
+				// Premium Earth Tone Palette
+				forest: {
+					50: 'hsl(var(--forest-50))',
+					500: 'hsl(var(--forest-500))',
+					600: 'hsl(var(--forest-600))',
+					700: 'hsl(var(--forest-700))',
+				},
+				earth: {
+					50: 'hsl(var(--earth-50))',
+					400: 'hsl(var(--earth-400))',
+					500: 'hsl(var(--earth-500))',
+					600: 'hsl(var(--earth-600))',
+				},
+				crimson: {
+					500: 'hsl(var(--crimson-500))',
+					600: 'hsl(var(--crimson-600))',
+				},
+				stone: {
+					50: 'hsl(var(--stone-50))',
+					100: 'hsl(var(--stone-100))',
+					400: 'hsl(var(--stone-400))',
+					600: 'hsl(var(--stone-600))',
+					800: 'hsl(var(--stone-800))',
+				},
 				// Status colors para badges das soluções
 				status: {
 					teste: 'hsl(var(--status-teste))',

@@ -200,24 +200,53 @@ Cores inspiradas no logo da DrakoYuda para uma experiência imersiva
 
 /* Premium Button Variants */
 .btn-primary {
-  @apply bg-gradient-to-r from-forest-600 to-forest-700 hover:from-forest-700 hover:to-forest-800 text-white;
+  background: linear-gradient(to right, hsl(var(--forest-600)), hsl(var(--forest-700)));
+  color: white;
+}
+
+.btn-primary:hover {
+  background: linear-gradient(to right, hsl(var(--forest-700)), hsl(var(--forest-800)));
 }
 
 .btn-secondary {
-  @apply bg-gradient-to-r from-earth-500 to-earth-600 hover:from-earth-600 hover:to-earth-700 text-white;
+  background: linear-gradient(to right, hsl(var(--earth-500)), hsl(var(--earth-600)));
+  color: white;
+}
+
+.btn-secondary:hover {
+  background: linear-gradient(to right, hsl(var(--earth-600)), hsl(var(--earth-700)));
 }
 
 .btn-crimson {
-  @apply bg-gradient-to-r from-crimson-500 to-crimson-600 hover:from-crimson-600 hover:to-crimson-700 text-white;
+  background: linear-gradient(to right, hsl(var(--crimson-500)), hsl(var(--crimson-600)));
+  color: white;
+}
+
+.btn-crimson:hover {
+  background: linear-gradient(to right, hsl(var(--crimson-600)), hsl(var(--crimson-700)));
 }
 
 /* Glass Morphism Effects */
 .glass {
-  @apply backdrop-blur-xl bg-white/80 dark:bg-stone-900/80 border border-stone-200/50 dark:border-stone-700/50;
+  backdrop-filter: blur(12px);
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(229, 231, 235, 0.5);
+}
+
+.dark .glass {
+  background: rgba(41, 37, 36, 0.8);
+  border: 1px solid rgba(68, 64, 60, 0.5);
 }
 
 .glass-card {
-  @apply backdrop-blur-lg bg-white/60 dark:bg-stone-800/60 border border-stone-200/30 dark:border-stone-700/30;
+  backdrop-filter: blur(8px);
+  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid rgba(229, 231, 235, 0.3);
+}
+
+.dark .glass-card {
+  background: rgba(41, 37, 36, 0.6);
+  border: 1px solid rgba(68, 64, 60, 0.3);
 }
 
 /* 3D Card Effects */
@@ -242,27 +271,39 @@ Cores inspiradas no logo da DrakoYuda para uma experiência imersiva
 
 /* Status Badge Enhancements */
 .status-live { 
-  @apply bg-gradient-to-r from-forest-500 to-forest-600 text-white shadow-lg; 
+  background: linear-gradient(to right, hsl(var(--forest-500)), hsl(var(--forest-600)));
+  color: white;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
 .status-parceria { 
-  @apply bg-gradient-to-r from-earth-500 to-earth-600 text-white shadow-lg; 
+  background: linear-gradient(to right, hsl(var(--earth-500)), hsl(var(--earth-600)));
+  color: white;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
 .status-teste-usuarios { 
-  @apply bg-gradient-to-r from-yellow-500 to-orange-500 text-white shadow-lg; 
+  background: linear-gradient(to right, #F59E0B, #D97706);
+  color: white;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
 .status-prototipo { 
-  @apply bg-gradient-to-r from-purple-500 to-violet-600 text-white shadow-lg; 
+  background: linear-gradient(to right, #8B5CF6, #7C3AED);
+  color: white;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
 .status-conceito { 
-  @apply bg-gradient-to-r from-stone-400 to-stone-600 text-white shadow-lg; 
+  background: linear-gradient(to right, hsl(var(--stone-400)), hsl(var(--stone-600)));
+  color: white;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
 .status-teste { 
-  @apply bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg; 
+  background: linear-gradient(to right, #3B82F6, #1D4ED8);
+  color: white;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
 .touch-target {
