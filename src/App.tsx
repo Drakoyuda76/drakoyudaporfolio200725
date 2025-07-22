@@ -1,5 +1,5 @@
 
-import React from "react";
+import React, { useEffect } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -59,7 +59,7 @@ const ErrorFallback = ({ error, resetErrorBoundary }: { error: Error; resetError
 );
 
 function App() {
-  React.useEffect(() => {
+  useEffect(() => {
     if (!window.sessionStart) {
       window.sessionStart = Date.now();
       localStorage.setItem('drakoyuda_visited', 'true');
