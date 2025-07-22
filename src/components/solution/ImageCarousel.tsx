@@ -31,19 +31,26 @@ const ImageCarousel = ({ images, solutionTitle }: ImageCarouselProps) => {
       {/* Main Display */}
       <Card className="relative overflow-hidden border-border/40 bg-card/50">
         <CardContent className="p-0">
-          <div className={`relative h-80 bg-gradient-to-br ${currentImage?.colorScheme || 'from-gray-600 to-gray-800'} flex items-center justify-center`}>
-            {/* Placeholder Visual Content */}
-            <div className="text-center space-y-4 p-8">
-              <div className="w-16 h-16 mx-auto bg-white/20 rounded-xl flex items-center justify-center">
-                <Play className="h-8 w-8 text-white" />
+          <div className="relative h-80 bg-muted flex items-center justify-center overflow-hidden">
+            {currentImage?.imageUrl ? (
+              <img 
+                src={currentImage.imageUrl} 
+                alt={currentImage.title}
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <div className="text-center space-y-4 p-8">
+                <div className="w-16 h-16 mx-auto bg-muted-foreground/20 rounded-xl flex items-center justify-center">
+                  <Play className="h-8 w-8 text-muted-foreground" />
+                </div>
+                <h3 className="text-xl font-tomorrow font-semibold text-foreground">
+                  {currentImage?.title}
+                </h3>
+                <p className="text-muted-foreground text-sm max-w-xs">
+                  {currentImage?.description}
+                </p>
               </div>
-              <h3 className="text-xl font-tomorrow font-semibold text-white">
-                {currentImage?.title}
-              </h3>
-              <p className="text-white/80 text-sm max-w-xs">
-                {currentImage?.description}
-              </p>
-            </div>
+            )}
 
             {/* Navigation Arrows */}
             {images.length > 1 && (
@@ -88,10 +95,18 @@ const ImageCarousel = ({ images, solutionTitle }: ImageCarouselProps) => {
                   : 'hover:ring-1 hover:ring-accent/50 hover:ring-offset-1 hover:ring-offset-background'
               } rounded-lg overflow-hidden transition-all duration-200`}
             >
-              <div className={`w-20 h-16 bg-gradient-to-br ${image.colorScheme} flex items-center justify-center`}>
-                <div className="w-6 h-6 bg-white/30 rounded-md flex items-center justify-center">
-                  <Play className="h-3 w-3 text-white" />
-                </div>
+              <div className="w-20 h-16 bg-muted flex items-center justify-center overflow-hidden">
+                {image.imageUrl ? (
+                  <img 
+                    src={image.imageUrl} 
+                    alt={image.title}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-6 h-6 bg-muted-foreground/30 rounded-md flex items-center justify-center">
+                    <Play className="h-3 w-3 text-muted-foreground" />
+                  </div>
+                )}
               </div>
               {index === currentIndex && (
                 <div className="absolute inset-0 bg-accent/20" />

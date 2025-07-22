@@ -16,7 +16,7 @@ export interface SolutionImage {
   id: string;
   title: string;
   description: string;
-  colorScheme: string;
+  imageUrl: string;
 }
 
 export interface Solution {

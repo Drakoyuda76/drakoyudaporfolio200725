@@ -1,9 +1,10 @@
-import React from 'react';
-import { Trash2, Plus } from 'lucide-react';
+import React, { useState } from 'react';
+import { Trash2, Plus, Upload, Image as ImageIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import type { Solution } from '@/types/solution';
+import { uploadSolutionImage, deleteSolutionImage } from '@/utils/supabaseStorage';
 
 interface ImageManagementProps {
   solution: Solution;
@@ -11,11 +12,13 @@ interface ImageManagementProps {
 }
 
 const ImageManagement: React.FC<ImageManagementProps> = ({ solution, updateSolution }) => {
-  const updateImageColorScheme = (imageIndex: number, newColorScheme: string) => {
+  const [uploadingIndex, setUploadingIndex] = useState<number | null>(null);
+
+  const updateImageUrl = (imageIndex: number, newImageUrl: string) => {
     const updatedImages = [...(solution.images || [])];
     updatedImages[imageIndex] = { 
       ...updatedImages[imageIndex], 
-      colorScheme: newColorScheme 
+      imageUrl: newImageUrl 
     };
     updateSolution({ ...solution, images: updatedImages });
   };
@@ -38,13 +41,31 @@ const ImageManagement: React.FC<ImageManagementProps> = ({ solution, updateSolut
     updateSolution({ ...solution, images: updatedImages });
   };
 
+  const handleFileUpload = async (imageIndex: number, file: File) => {
+    setUploadingIndex(imageIndex);
+    
+    try {
+      const imageUrl = await uploadSolutionImage(file);
+      if (imageUrl) {
+        updateImageUrl(imageIndex, imageUrl);
+      } else {
+        alert('Erro ao fazer upload da imagem. Tente novamente.');
+      }
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      alert('Erro ao fazer upload da imagem. Tente novamente.');
+    } finally {
+      setUploadingIndex(null);
+    }
+  };
+
   const addNewImage = () => {
     const currentImages = solution.images || [];
     const newImage = {
       id: Date.now().toString(),
       title: `Imagem ${currentImages.length + 1}`,
       description: 'Nova imagem da solução',
-      colorScheme: '#6B7280'
+      imageUrl: ''
     };
     updateSolution({ 
       ...solution, 
@@ -52,7 +73,11 @@ const ImageManagement: React.FC<ImageManagementProps> = ({ solution, updateSolut
     });
   };
 
-  const removeImage = (imageIndex: number) => {
+  const removeImage = async (imageIndex: number) => {
+    const image = solution.images?.[imageIndex];
+    if (image?.imageUrl) {
+      await deleteSolutionImage(image.imageUrl);
+    }
     const updatedImages = (solution.images || []).filter((_, index) => index !== imageIndex);
     updateSolution({ ...solution, images: updatedImages });
   };
@@ -74,11 +99,19 @@ const ImageManagement: React.FC<ImageManagementProps> = ({ solution, updateSolut
         {(solution.images || []).map((image, index) => (
           <div key={image.id || index} className="border border-border rounded-lg p-4 space-y-4 bg-background">
             {/* Image Preview */}
-            <div 
-              className="w-full h-32 rounded-md flex items-center justify-center text-white font-bold text-xl shadow-inner"
-              style={{ backgroundColor: image.colorScheme || '#6B7280' }}
-            >
-              {getInitials(solution.title)}
+            <div className="w-full h-32 rounded-md flex items-center justify-center bg-muted overflow-hidden">
+              {image.imageUrl ? (
+                <img 
+                  src={image.imageUrl} 
+                  alt={image.title}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="flex flex-col items-center justify-center text-muted-foreground">
+                  <ImageIcon className="w-8 h-8 mb-2" />
+                  <span className="text-sm">Sem imagem</span>
+                </div>
+              )}
             </div>
             
             {/* Image Title */}
@@ -109,27 +142,30 @@ const ImageManagement: React.FC<ImageManagementProps> = ({ solution, updateSolut
               />
             </div>
             
-            {/* Color Picker */}
+            {/* File Upload */}
             <div>
-              <Label htmlFor={`image-color-${index}`} className="block text-sm font-medium mb-2">
-                Cor de Fundo
+              <Label htmlFor={`image-upload-${index}`} className="block text-sm font-medium mb-2">
+                Upload de Imagem
               </Label>
-              <div className="flex items-center space-x-2">
-                <Input
-                  id={`image-color-${index}`}
-                  type="color"
-                  value={image.colorScheme || '#6B7280'}
-                  onChange={(e) => updateImageColorScheme(index, e.target.value)}
-                  className="w-16 h-10 p-1 border rounded-md cursor-pointer"
-                />
-                <Input
-                  type="text"
-                  value={image.colorScheme || '#6B7280'}
-                  onChange={(e) => updateImageColorScheme(index, e.target.value)}
-                  placeholder="#6B7280"
-                  className="flex-1"
-                />
-              </div>
+              <Input
+                id={`image-upload-${index}`}
+                type="file"
+                accept="image/*"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    handleFileUpload(index, file);
+                  }
+                }}
+                disabled={uploadingIndex === index}
+                className="cursor-pointer"
+              />
+              {uploadingIndex === index && (
+                <div className="flex items-center mt-2 text-sm text-muted-foreground">
+                  <Upload className="w-4 h-4 mr-2 animate-spin" />
+                  Fazendo upload...
+                </div>
+              )}
             </div>
             
             {/* Remove Button */}
