@@ -1,70 +1,151 @@
 import React from 'react';
-import { cn } from '@/lib/utils';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface SDGIconProps {
-  sdgNumber: number;
-  size?: string;
+  goalNumber: number;
+  size?: 'sm' | 'md' | 'lg';
   className?: string;
-  showTooltip?: boolean;
 }
 
-const SDGIcon: React.FC<SDGIconProps> = ({ 
-  sdgNumber, 
-  size = "w-12 h-12", 
-  className = "",
-  showTooltip = true 
-}) => {
-  // Official UN SDG Colors and Portuguese names
-  const sdgData: Record<number, { name: string; color: string; }> = {
-    1: { name: "Erradicação da Pobreza", color: "#E5243B" },
-    2: { name: "Fome Zero e Agricultura Sustentável", color: "#DDA63A" },
-    3: { name: "Saúde e Bem-Estar", color: "#4C9F38" },
-    4: { name: "Educação de Qualidade", color: "#C5192D" },
-    5: { name: "Igualdade de Género", color: "#FF3A21" },
-    6: { name: "Água Potável e Saneamento", color: "#26BDE2" },
-    7: { name: "Energias Renováveis e Acessíveis", color: "#FCC30B" },
-    8: { name: "Trabalho Digno e Crescimento Económico", color: "#A21942" },
-    9: { name: "Indústria, Inovação e Infraestrutura", color: "#FD6925" },
-    10: { name: "Redução das Desigualdades", color: "#DD1367" },
-    11: { name: "Cidades e Comunidades Sustentáveis", color: "#FD9D24" },
-    12: { name: "Produção e Consumo Sustentáveis", color: "#BF8B2E" },
-    13: { name: "Ação Climática", color: "#3F7E44" },
-    14: { name: "Proteger a Vida Marinha", color: "#0A97D9" },
-    15: { name: "Proteger a Vida Terrestre", color: "#56C02B" },
-    16: { name: "Paz, Justiça e Instituições Eficazes", color: "#00689D" },
-    17: { name: "Parcerias para a Implementação dos Objetivos", color: "#19486A" },
+const SDGIcon: React.FC<SDGIconProps> = ({ goalNumber, size = 'md', className = '' }) => {
+  const sdgData = {
+    1: { 
+      title: 'ODS 1: Erradicação da Pobreza',
+      color: '#e5243b',
+      description: 'Acabar com a pobreza em todas as suas formas, em todos os lugares'
+    },
+    3: { 
+      title: 'ODS 3: Saúde e Bem-Estar',
+      color: '#4c9f38',
+      description: 'Assegurar uma vida saudável e promover o bem-estar para todos, em todas as idades'
+    },
+    4: { 
+      title: 'ODS 4: Educação de Qualidade',
+      color: '#c5192d',
+      description: 'Assegurar a educação inclusiva e equitativa e de qualidade, e promover oportunidades de aprendizagem ao longo da vida para todos'
+    },
+    8: { 
+      title: 'ODS 8: Trabalho Digno e Crescimento Económico',
+      color: '#a21942',
+      description: 'Promover o crescimento económico sustentado, inclusivo e sustentável, emprego pleno e produtivo e trabalho digno para todos'
+    },
+    9: { 
+      title: 'ODS 9: Indústria, Inovação e Infraestrutura',
+      color: '#fd6925',
+      description: 'Construir infraestruturas resilientes, promover a industrialização inclusiva e sustentável e fomentar a inovação'
+    },
+    10: { 
+      title: 'ODS 10: Redução das Desigualdades',
+      color: '#dd1367',
+      description: 'Reduzir a desigualdade dentro dos países e entre eles'
+    },
+    11: { 
+      title: 'ODS 11: Cidades e Comunidades Sustentáveis',
+      color: '#fd9d24',
+      description: 'Tornar as cidades e os assentamentos humanos inclusivos, seguros, resilientes e sustentáveis'
+    },
+    13: { 
+      title: 'ODS 13: Ação Climática',
+      color: '#3f7e44',
+      description: 'Tomar medidas urgentes para combater a mudança climática e seus impactos'
+    },
+    16: { 
+      title: 'ODS 16: Paz, Justiça e Instituições Eficazes',
+      color: '#02558b',
+      description: 'Promover sociedades pacíficas e inclusivas para o desenvolvimento sustentável, proporcionar o acesso à justiça para todos e construir instituições eficazes, responsáveis e inclusivas em todos os níveis'
+    }
   };
 
-  const sdg = sdgData[sdgNumber];
+  const sizeClasses = {
+    sm: 'w-8 h-8 text-xs',
+    md: 'w-12 h-12 text-sm',
+    lg: 'w-16 h-16 text-base'
+  };
+
+  const data = sdgData[goalNumber as keyof typeof sdgData];
   
-  if (!sdg) return null;
+  if (!data) {
+    return null;
+  }
 
   return (
-    <div 
-      className={cn(
-        `${size} relative group cursor-pointer transition-all duration-300 hover:scale-110 hover:z-10`,
-        className
-      )}
-      title={showTooltip ? `ODS ${sdgNumber}: ${sdg.name}` : undefined}
-    >
-      {/* SDG Icon - Simplified colored square with number */}
-      <div 
-        className="w-full h-full rounded-lg shadow-lg group-hover:shadow-2xl transition-shadow duration-300 flex items-center justify-center text-white font-bold text-lg relative overflow-hidden"
-        style={{ backgroundColor: sdg.color }}
-      >
-        <span className="drop-shadow-lg z-10">{sdgNumber}</span>
-        
-        {/* 3D hover effect */}
-        <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-lg" />
-      </div>
-      
-      {/* Tooltip on hover */}
-      {showTooltip && (
-        <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-black/80 text-white text-xs rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap z-20 pointer-events-none">
-          ODS {sdgNumber}: {sdg.name}
-        </div>
-      )}
-    </div>
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <div className={`${sizeClasses[size]} ${className} cursor-help`}>
+            <svg
+              viewBox="0 0 100 100"
+              className="w-full h-full"
+              style={{ backgroundColor: data.color }}
+            >
+              {/* Background circle */}
+              <rect width="100" height="100" fill={data.color} />
+              
+              {/* White circle for number */}
+              <circle
+                cx="50"
+                cy="30"
+                r="18"
+                fill="white"
+              />
+              
+              {/* SDG number */}
+              <text
+                x="50"
+                y="36"
+                textAnchor="middle"
+                fontSize="16"
+                fontWeight="bold"
+                fill={data.color}
+                fontFamily="Tomorrow, sans-serif"
+              >
+                {goalNumber}
+              </text>
+              
+              {/* Bottom decorative element */}
+              <rect
+                x="15"
+                y="55"
+                width="70"
+                height="35"
+                fill="white"
+                fillOpacity="0.9"
+                rx="3"
+              />
+              
+              {/* Mini icon placeholder */}
+              <circle
+                cx="30"
+                cy="70"
+                r="6"
+                fill={data.color}
+                fillOpacity="0.7"
+              />
+              <circle
+                cx="50"
+                cy="70"
+                r="6"
+                fill={data.color}
+                fillOpacity="0.7"
+              />
+              <circle
+                cx="70"
+                cy="70"
+                r="6"
+                fill={data.color}
+                fillOpacity="0.7"
+              />
+            </svg>
+          </div>
+        </TooltipTrigger>
+        <TooltipContent className="max-w-xs p-3">
+          <div className="space-y-1">
+            <p className="font-semibold text-sm">{data.title}</p>
+            <p className="text-xs text-muted-foreground">{data.description}</p>
+          </div>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   );
 };
 
