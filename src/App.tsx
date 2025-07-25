@@ -14,7 +14,8 @@ import SolutionsPage from "./pages/SolutionsPage";
 import AboutPage from "./pages/AboutPage";
 import ContactPage from "./pages/ContactPage";
 import SolutionDetail from "./pages/SolutionDetail";
-import AdminPanel from "./components/admin/AdminPanel";
+import LoginPage from "./pages/LoginPage";
+import AdminDashboard from "./pages/AdminDashboard";
 import NotFound from "./pages/NotFound";
 import { AlertTriangle } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -79,7 +80,8 @@ function App() {
                 <Route path="/solucoes/:id" element={<SolutionDetail />} />
                 <Route path="/sobre" element={<AboutPage />} />
                 <Route path="/contacto" element={<ContactPage />} />
-                <Route path="/admin" element={<AdminPanel />} />
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/admin" element={<AdminDashboard />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
               <ScrollToTop />

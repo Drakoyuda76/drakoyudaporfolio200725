@@ -99,6 +99,13 @@ const Header = () => {
           >
             Contactar
           </Button>
+          <Button 
+            variant="default" 
+            size="sm"
+            onClick={() => navigate('/login')}
+          >
+            Admin
+          </Button>
         </div>
 
         {/* Mobile Menu Button */}
