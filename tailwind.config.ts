@@ -21,16 +21,6 @@ export default {
 			fontFamily: {
 				'tomorrow': ['Tomorrow', 'sans-serif'],
 			},
-			fontSize: {
-				'xs': ['var(--text-xs)', { lineHeight: '1.4' }],
-				'sm': ['var(--text-sm)', { lineHeight: '1.5' }],
-				'base': ['var(--text-base)', { lineHeight: '1.6' }],
-				'lg': ['var(--text-lg)', { lineHeight: '1.6' }],
-				'xl': ['var(--text-xl)', { lineHeight: '1.4' }],
-				'2xl': ['var(--text-2xl)', { lineHeight: '1.3' }],
-				'3xl': ['var(--text-3xl)', { lineHeight: '1.2' }],
-				'4xl': ['var(--text-4xl)', { lineHeight: '1.1' }],
-			},
 			colors: {
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',

@@ -1,5 +1,5 @@
 
-import React, { useEffect } from "react";
+import React from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -7,7 +7,6 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { ErrorBoundary } from "react-error-boundary";
-import { HelmetProvider } from 'react-helmet-async';
 import ScrollToTop from "@/components/ui/scroll-to-top";
 import ChatAssistant from "@/components/ui/chat-assistant";
 import HomePage from "./pages/HomePage";
@@ -16,10 +15,7 @@ import AboutPage from "./pages/AboutPage";
 import ContactPage from "./pages/ContactPage";
 import SolutionDetail from "./pages/SolutionDetail";
 import AdminPanel from "./components/admin/AdminPanel";
-import AuthPage from "./pages/AuthPage";
 import NotFound from "./pages/NotFound";
-import { AuthProvider } from "./contexts/AuthContext";
-import ProtectedRoute from "./components/auth/ProtectedRoute";
 import { AlertTriangle } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -62,7 +58,7 @@ const ErrorFallback = ({ error, resetErrorBoundary }: { error: Error; resetError
 );
 
 function App() {
-  useEffect(() => {
+  React.useEffect(() => {
     if (!window.sessionStart) {
       window.sessionStart = Date.now();
       localStorage.setItem('drakoyuda_visited', 'true');
@@ -71,39 +67,27 @@ function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <HelmetProvider>
-        <ThemeProvider>
-          <TooltipProvider>
-            <AuthProvider>
-              <ErrorBoundary FallbackComponent={ErrorFallback}>
-                <Toaster />
-                <Sonner />
-                <BrowserRouter>
-                <Routes>
-                  <Route path="/" element={<HomePage />} />
-                  <Route path="/solucoes" element={<SolutionsPage />} />
-                  <Route path="/solucoes/:id" element={<SolutionDetail />} />
-                  <Route path="/sobre" element={<AboutPage />} />
-                  <Route path="/contacto" element={<ContactPage />} />
-                  <Route path="/auth" element={<AuthPage />} />
-                  <Route 
-                    path="/admin" 
-                    element={
-                      <ProtectedRoute requireAdmin>
-                        <AdminPanel />
-                      </ProtectedRoute>
-                    } 
-                  />
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-                <ScrollToTop />
-                <ChatAssistant />
-                </BrowserRouter>
-              </ErrorBoundary>
-            </AuthProvider>
-          </TooltipProvider>
-        </ThemeProvider>
-      </HelmetProvider>
+      <ThemeProvider>
+        <TooltipProvider>
+          <ErrorBoundary FallbackComponent={ErrorFallback}>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <Routes>
+                <Route path="/" element={<HomePage />} />
+                <Route path="/solucoes" element={<SolutionsPage />} />
+                <Route path="/solucoes/:id" element={<SolutionDetail />} />
+                <Route path="/sobre" element={<AboutPage />} />
+                <Route path="/contacto" element={<ContactPage />} />
+                <Route path="/admin" element={<AdminPanel />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+              <ScrollToTop />
+              <ChatAssistant />
+            </BrowserRouter>
+          </ErrorBoundary>
+        </TooltipProvider>
+      </ThemeProvider>
     </QueryClientProvider>
   );
 }

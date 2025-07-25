@@ -7,7 +7,6 @@ import { Separator } from '@/components/ui/separator';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import Header from '@/components/layout/Header';
 import ImageCarousel from '@/components/solution/ImageCarousel';
-import SDGIcon from '@/components/ui/sdg-icon';
 import { getSolutions, getStatusLabel, getStatusColor, getBusinessAreaLabel } from '@/data/solutions';
 
 const SolutionDetail = () => {
@@ -34,9 +33,7 @@ const SolutionDetail = () => {
         day: 'numeric'
       });
     } catch (error) {
-      if (process.env.NODE_ENV === 'development') {
-        console.error('Date formatting error:', error);
-      }
+      console.error('Date formatting error:', error);
       return 'Data não disponível';
     }
   };
@@ -139,87 +136,65 @@ const SolutionDetail = () => {
             </Card>
 
             {/* Problem & Solution */}
-            <Card className="border-border/40 bg-card/50 hover:shadow-lg transition-all duration-300">
-              <CardHeader className="pb-4">
+            <Card className="border-border/40 bg-card/50">
+              <CardHeader>
                 <CardTitle className="text-xl font-tomorrow flex items-center">
-                  <div className="mr-4 p-2 rounded-lg bg-accent/10">
-                    <Target className="h-6 w-6 text-accent" />
-                  </div>
-                  <div>
-                    <span className="text-foreground">Problema & Solução</span>
-                    <p className="text-sm text-muted-foreground font-normal mt-1">
-                      Desafio identificado e abordagem implementada
-                    </p>
-                  </div>
+                  <Target className="mr-2 h-5 w-5 text-accent" />
+                  Problema & Solução
                 </CardTitle>
               </CardHeader>
-              <CardContent className="pt-0">
-                <p className="text-muted-foreground leading-relaxed text-base">
+              <CardContent>
+                <p className="text-muted-foreground leading-relaxed">
                   {solution.problemSolution}
                 </p>
               </CardContent>
             </Card>
 
             {/* Human Impact */}
-            <Card className="border-border/40 bg-card/50 hover:shadow-lg transition-all duration-300">
-              <CardHeader className="pb-4">
+            <Card className="border-border/40 bg-card/50">
+              <CardHeader>
                 <CardTitle className="text-xl font-tomorrow flex items-center">
-                  <div className="mr-4 p-2 rounded-lg bg-accent/10">
-                    <Users className="h-6 w-6 text-accent" />
-                  </div>
-                  <div>
-                    <span className="text-foreground">Impacto Humano & Benefícios</span>
-                    <p className="text-sm text-muted-foreground font-normal mt-1">
-                      Como esta solução beneficia pessoas e comunidades
-                    </p>
-                  </div>
+                  <Users className="mr-2 h-5 w-5 text-accent" />
+                  Impacto Humano & Benefícios
                 </CardTitle>
               </CardHeader>
-              <CardContent className="pt-0">
-                <p className="text-muted-foreground leading-relaxed text-base">
+              <CardContent>
+                <p className="text-muted-foreground leading-relaxed">
                   {solution.humanImpact}
                 </p>
               </CardContent>
             </Card>
 
             {/* Sustainability Impact */}
-            <Card className="border-border/40 bg-card/50 hover:shadow-lg transition-all duration-300">
-              <CardHeader className="pb-4">
+            <Card className="border-border/40 bg-card/50">
+              <CardHeader>
                 <CardTitle className="text-xl font-tomorrow flex items-center">
-                  <div className="mr-4 p-2 rounded-lg bg-accent/10">
-                    <Globe className="h-6 w-6 text-accent" />
-                  </div>
-                  <div>
-                    <span className="text-foreground">Impacto & Sustentabilidade</span>
-                    <p className="text-sm text-muted-foreground font-normal mt-1">
-                      Contribuição para o desenvolvimento sustentável
-                    </p>
-                  </div>
+                  <Globe className="mr-2 h-5 w-5 text-accent" />
+                  Impacto & Sustentabilidade
                 </CardTitle>
               </CardHeader>
-              <CardContent className="pt-0 space-y-6">
-                <p className="text-muted-foreground leading-relaxed text-base">
+              <CardContent className="space-y-4">
+                <p className="text-muted-foreground leading-relaxed">
                   {solution.sustainabilityImpact}
                 </p>
                 
-                <div className="pt-4 border-t border-border/50">
-                  <h4 className="font-semibold text-foreground mb-4 flex items-center">
-                    <span className="w-2 h-2 bg-accent rounded-full mr-3"></span>
-                    Objetivos de Desenvolvimento Sustentável (ODS)
-                  </h4>
-                  <div className="flex flex-wrap gap-3">
+                <div>
+                  <h4 className="font-medium text-foreground mb-3">Objetivos de Desenvolvimento Sustentável (ODS):</h4>
+                  <div className="flex flex-wrap gap-2">
                     {solution.sdgGoals.map(goal => (
-                      <SDGIcon 
-                        key={goal} 
-                        goalNumber={goal} 
-                        size="md"
-                        className="hover:scale-110 transition-transform duration-200"
-                      />
+                      <div 
+                        key={goal}
+                        className="flex items-center space-x-2 px-3 py-2 bg-accent/10 border border-accent/20 rounded-lg"
+                      >
+                        <div className="w-6 h-6 bg-accent text-accent-foreground rounded text-xs font-bold flex items-center justify-center">
+                          {goal}
+                        </div>
+                        <span className="text-sm text-foreground">
+                          {sdgDescriptions[goal as keyof typeof sdgDescriptions]}
+                        </span>
+                      </div>
                     ))}
                   </div>
-                  <p className="text-xs text-muted-foreground mt-3">
-                    Esta solução contribui diretamente para {solution.sdgGoals.length} dos 17 Objetivos de Desenvolvimento Sustentável da ONU.
-                  </p>
                 </div>
               </CardContent>
             </Card>

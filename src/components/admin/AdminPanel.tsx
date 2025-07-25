@@ -1,98 +1,127 @@
 
 import { useState, useEffect } from 'react';
-import { useToast } from '@/hooks/use-toast';
-import type { Solution } from '@/types/solution';
-import { getSolutionsFromDB, saveSolutionToDB, deleteSolutionFromDB } from '@/utils/solutionService';
-import { exportSolutionsAsJSON } from '@/utils/storage';
+import { Plus, Edit, Trash2, Upload, FileText, Save, X, Download, RefreshCw } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
+import { useNavigate } from 'react-router-dom';
+import { getSolutions, getStatusLabel, getStatusColor, updateSolutions } from '@/data/solutions';
+import { saveSolutions, loadSolutions, exportSolutionsAsJSON, clearStorageData } from '@/utils/storage';
 import AdminPanelHeader from './AdminPanelHeader';
 import SolutionRowItem from './SolutionRowItem';
-import SolutionEditSheet from './SolutionEditSheet';
+import type { Solution, SolutionStatus, BusinessArea } from '@/types/solution';
 
 const AdminPanel = () => {
-  const [localSolutions, setLocalSolutions] = useState<Solution[]>([]);
-  const [isSheetOpen, setIsSheetOpen] = useState(false);
-  const [editingSolution, setEditingSolution] = useState<Partial<Solution> | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-  const { toast } = useToast();
+  const navigate = useNavigate();
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [localSolutions, setLocalSolutions] = useState<Solution[]>(() => getSolutions());
 
-  useEffect(() => {
-    const loadSolutions = async () => {
-      try {
-        const solutions = await getSolutionsFromDB();
-        setLocalSolutions(solutions);
-      } catch (error) {
-        toast({
-          variant: "destructive",
-          title: "Erro",
-          description: "Não foi possível carregar as soluções.",
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    };
+  const businessAreas: BusinessArea[] = ['front-office', 'back-office', 'core-capabilities', 'products-services'];
+  const statuses: SolutionStatus[] = ['conceito', 'prototipo', 'teste-usuarios', 'teste-convite', 'parceria', 'live'];
 
-    loadSolutions();
-  }, [toast]);
+  const [formData, setFormData] = useState<Partial<Solution>>({
+    title: '',
+    subtitle: '',
+    description: '',
+    status: 'conceito',
+    businessAreaImpact: [],
+    problemSolution: '',
+    humanImpact: '',
+    sustainabilityImpact: '',
+    sdgGoals: [],
+    timesSaved: 0,
+    usersImpacted: 0,
+    images: []
+  });
+
+  const resetForm = () => {
+    setFormData({
+      title: '',
+      subtitle: '',
+      description: '',
+      status: 'conceito',
+      businessAreaImpact: [],
+      problemSolution: '',
+      humanImpact: '',
+      sustainabilityImpact: '',
+      sdgGoals: [],
+      timesSaved: 0,
+      usersImpacted: 0,
+      images: []
+    });
+  };
 
   const handleEdit = (solution: Solution) => {
-    setEditingSolution(solution);
-    setIsSheetOpen(true);
+    setFormData(solution);
+    setEditingId(solution.id);
+    setShowAddForm(true);
   };
 
-  const handleAddNew = () => {
-    setEditingSolution(null);
-    setIsSheetOpen(true);
-  };
-
-  const handleDelete = async (id: string) => {
+  const handleDelete = (id: string) => {
     if (confirm('Tem certeza que deseja excluir esta solução?')) {
-      try {
-        const success = await deleteSolutionFromDB(id);
-        if (success) {
-          const updatedSolutions = localSolutions.filter(solution => solution.id !== id);
-          setLocalSolutions(updatedSolutions);
-          toast({
-            title: "Sucesso!",
-            description: "Solução excluída com sucesso.",
-          });
-        } else {
-          throw new Error('Falha ao excluir');
-        }
-      } catch (error) {
-        toast({
-          variant: "destructive",
-          title: "Erro",
-          description: "Não foi possível excluir a solução.",
-        });
-      }
+      const updatedSolutions = localSolutions.filter(s => s.id !== id);
+      setLocalSolutions(updatedSolutions);
+      updateSolutions(updatedSolutions);
+      saveSolutions(updatedSolutions);
     }
   };
 
-  const handleSave = async (solutionToSave: Solution) => {
-    try {
-      const success = await saveSolutionToDB(solutionToSave);
-      if (success) {
-        const existingIndex = localSolutions.findIndex(s => s.id === solutionToSave.id);
-        let updatedSolutions;
-        
-        if (existingIndex >= 0) {
-          updatedSolutions = [...localSolutions];
-          updatedSolutions[existingIndex] = solutionToSave;
-        } else {
-          updatedSolutions = [...localSolutions, solutionToSave];
-        }
-        
-        setLocalSolutions(updatedSolutions);
-      } else {
-        throw new Error('Falha ao salvar');
-      }
-    } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Erro",
-        description: "Não foi possível salvar a solução.",
-      });
+  const handleSave = () => {
+    if (!formData.title || !formData.subtitle) {
+      alert('Por favor, preencha pelo menos o título e subtítulo.');
+      return;
     }
+
+    const newSolution: Solution = {
+      ...formData,
+      id: editingId || formData.title!.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
+      createdAt: editingId ? localSolutions.find(s => s.id === editingId)?.createdAt || new Date() : new Date(),
+      updatedAt: new Date(),
+    } as Solution;
+
+    let updatedSolutions: Solution[];
+    if (editingId) {
+      updatedSolutions = localSolutions.map(s => s.id === editingId ? newSolution : s);
+    } else {
+      updatedSolutions = [...localSolutions, newSolution];
+    }
+
+    setLocalSolutions(updatedSolutions);
+    updateSolutions(updatedSolutions);
+    saveSolutions(updatedSolutions);
+
+    setShowAddForm(false);
+    setEditingId(null);
+    resetForm();
+  };
+
+  const handleImportMD = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file && file.type === 'text/markdown') {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const content = e.target?.result as string;
+        setFormData(prev => ({
+          ...prev,
+          description: content
+        }));
+      };
+      reader.readAsText(file);
+    }
+  };
+
+  const toggleBusinessArea = (area: BusinessArea) => {
+    setFormData(prev => ({
+      ...prev,
+      businessAreaImpact: prev.businessAreaImpact?.includes(area)
+        ? prev.businessAreaImpact.filter(a => a !== area)
+        : [...(prev.businessAreaImpact || []), area]
+    }));
   };
 
   const handleExportData = () => {
@@ -106,8 +135,17 @@ const AdminPanel = () => {
     URL.revokeObjectURL(url);
   };
 
+  const handleRefreshData = () => {
+    if (confirm('Isto irá recarregar os dados do localStorage. Continuar?')) {
+      const savedData = loadSolutions();
+      if (savedData) {
+        setLocalSolutions(savedData);
+      }
+    }
+  };
+
   const validatePortfolioContent = () => {
-    const solutions = localSolutions;
+    const solutions = loadSolutions();
     const issues: string[] = [];
 
     if (!solutions || solutions.length === 0) {
@@ -130,21 +168,13 @@ const AdminPanel = () => {
   const runPortfolioValidation = () => {
     const issues = validatePortfolioContent();
     if (issues.length === 0) {
-      alert('✅ Portfólio pronto para demonstração!\n\n• Soluções completas\n• Todas as imagens configuradas\n• Conteúdo validado');
+      alert('✅ Portfólio pronto para demonstração!\n\n• 10 soluções completas\n• Todas as imagens configuradas\n• Conteúdo validado');
     } else {
       alert(`⚠️ Questões encontradas (${issues.length}):\n\n${issues.slice(0, 5).join('\n')}${issues.length > 5 ? '\n...' : ''}`);
     }
   };
 
   const totalHoursSaved = localSolutions.reduce((sum, solution) => sum + solution.timesSaved, 0);
-
-  if (isLoading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
@@ -153,16 +183,166 @@ const AdminPanel = () => {
         totalHoursSaved={totalHoursSaved}
         onValidatePortfolio={runPortfolioValidation}
         onExportData={handleExportData}
-        onNewSolution={handleAddNew}
+        onNewSolution={() => {
+          setShowAddForm(true);
+          setEditingId(null);
+          resetForm();
+        }}
       />
 
       <div className="max-w-7xl mx-auto px-6 py-8">
+        {/* Add/Edit Form */}
+        {showAddForm && (
+          <Card className="mb-8">
+            <CardHeader>
+              <CardTitle>
+                {editingId ? 'Editar Solução' : 'Adicionar Nova Solução'}
+              </CardTitle>
+              <CardDescription>
+                Preencha os dados da solução de IA
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-6">
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="title">Título *</Label>
+                  <Input
+                    id="title"
+                    value={formData.title || ''}
+                    onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
+                    placeholder="Ex: Assistente Financeiro Pessoal"
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="subtitle">Subtítulo *</Label>
+                  <Input
+                    id="subtitle"
+                    value={formData.subtitle || ''}
+                    onChange={(e) => setFormData(prev => ({ ...prev, subtitle: e.target.value }))}
+                    placeholder="Ex: IA para Gestão Financeira Inteligente"
+                  />
+                </div>
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="status">Status</Label>
+                  <Select 
+                    value={formData.status} 
+                    onValueChange={(value) => setFormData(prev => ({ ...prev, status: value as SolutionStatus }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {statuses.map(status => (
+                        <SelectItem key={status} value={status}>
+                          {getStatusLabel(status)}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label>Áreas de Negócio</Label>
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {businessAreas.map(area => (
+                      <Badge
+                        key={area}
+                        variant={formData.businessAreaImpact?.includes(area) ? "default" : "outline"}
+                        className="cursor-pointer"
+                        onClick={() => toggleBusinessArea(area)}
+                      >
+                        {area.replace('-', ' ')}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <Label htmlFor="description">Descrição</Label>
+                <Textarea
+                  id="description"
+                  value={formData.description || ''}
+                  onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                  placeholder="Descrição da solução..."
+                  rows={3}
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="problemSolution">Problema & Solução</Label>
+                <Textarea
+                  id="problemSolution"
+                  value={formData.problemSolution || ''}
+                  onChange={(e) => setFormData(prev => ({ ...prev, problemSolution: e.target.value }))}
+                  placeholder="Descrição do problema e como a solução resolve..."
+                  rows={3}
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="humanImpact">Impacto Humano</Label>
+                <Textarea
+                  id="humanImpact"
+                  value={formData.humanImpact || ''}
+                  onChange={(e) => setFormData(prev => ({ ...prev, humanImpact: e.target.value }))}
+                  placeholder="Como a solução impacta positivamente as pessoas..."
+                  rows={3}
+                />
+              </div>
+
+              <div className="grid md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="timesSaved">Horas Poupadas</Label>
+                  <Input
+                    id="timesSaved"
+                    type="number"
+                    value={formData.timesSaved || 0}
+                    onChange={(e) => setFormData(prev => ({ ...prev, timesSaved: parseInt(e.target.value) || 0 }))}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="usersImpacted">Utilizadores Impactados</Label>
+                  <Input
+                    id="usersImpacted"
+                    type="number"
+                    value={formData.usersImpacted || 0}
+                    onChange={(e) => setFormData(prev => ({ ...prev, usersImpacted: parseInt(e.target.value) || 0 }))}
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end space-x-2">
+                <Button 
+                  variant="outline" 
+                  onClick={() => {
+                    setShowAddForm(false);
+                    setEditingId(null);
+                    resetForm();
+                  }}
+                >
+                  <X className="h-4 w-4 mr-2" />
+                  Cancelar
+                </Button>
+                <Button onClick={handleSave} className="bg-indigo-500 hover:bg-indigo-600">
+                  <Save className="h-4 w-4 mr-2" />
+                  Salvar
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Solutions Management */}
         <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
           <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
             <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
               Gestão de Soluções
             </h2>
           </div>
+          
           <div className="divide-y divide-gray-200 dark:divide-gray-700">
             {localSolutions.map((solution) => (
               <SolutionRowItem
@@ -175,13 +355,6 @@ const AdminPanel = () => {
           </div>
         </div>
       </div>
-
-      <SolutionEditSheet
-        isOpen={isSheetOpen}
-        onOpenChange={setIsSheetOpen}
-        solution={editingSolution}
-        onSave={handleSave}
-      />
     </div>
   );
 };

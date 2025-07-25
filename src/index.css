@@ -10,54 +10,44 @@ Cores inspiradas no logo da DrakoYuda para uma experiência imersiva
 
 @layer base {
   :root {
-    /* High-contrast earth tones for accessibility (WCAG AA compliant) */
-    --background: 0 0% 100%; /* Pure white for maximum contrast */
-    --foreground: 0 0% 10%; /* Near black for 15:1 contrast ratio */
+    /* DrakoYuda Light Mode Palette - Sophisticated Earth Tones */
+    --background: 37 28% 97%; /* Warm white #FEFCFA */
+    --foreground: 27 32% 16%; /* Rich dark brown #2A241C */
 
-    --card: 0 0% 98%; /* Very light background */
-    --card-foreground: 0 0% 15%; /* High contrast text */
+    --card: 45 25% 95%; /* Soft cream #F7F5F2 */
+    --card-foreground: 27 32% 25%; /* Warm dark #403931 */
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 10%;
+    --popover: 45 25% 95%;
+    --popover-foreground: 27 32% 25%;
 
-    --primary: 142 70% 25%; /* Deep forest green - #1F5F1F */
-    --primary-foreground: 0 0% 100%;
+    --primary: 142 41% 35%; /* Forest green #3D8B3D */
+    --primary-foreground: 37 28% 97%;
 
-    --secondary: 35 40% 60%; /* Professional earth tone */
-    --secondary-foreground: 0 0% 10%;
+    --secondary: 35 35% 70%; /* Warm earth #C49967 */
+    --secondary-foreground: 27 32% 16%;
 
-    --muted: 0 0% 95%;
-    --muted-foreground: 0 0% 40%; /* 7.2:1 contrast ratio */
+    --muted: 45 25% 90%;
+    --muted-foreground: 27 15% 45%; /* Medium brown #786B63 */
 
-    --accent: 142 60% 30%; /* Accessible forest green */
-    --accent-foreground: 0 0% 100%;
+    --accent: 142 41% 45%; /* Forest green accent #4A9D4A */
+    --accent-foreground: 37 28% 97%;
 
-    --destructive: 0 75% 45%; /* High contrast red */
-    --destructive-foreground: 0 0% 100%;
+    --destructive: 0 75% 55%; /* Strategic crimson #DC2626 */
+    --destructive-foreground: 37 28% 97%;
 
-    --border: 0 0% 88%; /* Clear borders */
-    --input: 0 0% 96%; /* High contrast inputs */
-    --ring: 142 60% 30%; /* Focus ring color */
+    --border: 45 25% 85%; /* Soft earth border #E7E1D8 */
+    --input: 45 25% 92%; /* Light cream input #F2EDE4 */
+    --ring: 142 41% 45%; /* Forest green focus rings */
 
     --radius: 0.75rem;
 
-    /* Typography scale for professional hierarchy */
-    --text-xs: 0.75rem;     /* 12px */
-    --text-sm: 0.875rem;    /* 14px */
-    --text-base: 1rem;      /* 16px */
-    --text-lg: 1.125rem;    /* 18px */
-    --text-xl: 1.25rem;     /* 20px */
-    --text-2xl: 1.5rem;     /* 24px */
-    --text-3xl: 1.875rem;   /* 30px */
-    --text-4xl: 2.25rem;    /* 36px */
-
-    /* High-contrast status colors (WCAG AA compliant) */
-    --status-teste: 217 91% 35%; /* Deep blue - 8.2:1 contrast */
-    --status-prototipo: 271 67% 35%; /* Deep purple - 7.4:1 contrast */
-    --status-parceria: 142 70% 25%; /* Deep forest - 9.1:1 contrast */
-    --status-live: 157 65% 30%; /* Deep teal - 8.8:1 contrast */
-    --status-conceito: 27 25% 35%; /* Deep brown - 7.6:1 contrast */
-    --status-teste-usuarios: 35 85% 40%; /* Deep orange - 6.9:1 contrast */
+    /* Premium Status Colors - Sophisticated Earth Palette */
+    --status-teste: 217 76% 48%; /* Blue - Test Invite */
+    --status-prototipo: 271 45% 50%; /* Deep purple - Prototype */
+    --status-parceria: 142 41% 45%; /* Forest green - Partnership */
+    --status-live: 157 45% 45%; /* Forest teal - Live */
+    --status-conceito: 27 20% 50%; /* Sophisticated brown - Concept */
+    --status-teste-usuarios: 35 70% 55%; /* Warm orange - User Testing */
 
     /* New Earth Tone Variables */
     --forest-50: 140 40% 96%;
@@ -175,68 +165,11 @@ Cores inspiradas no logo da DrakoYuda para uma experiência imersiva
 }
 
 @layer utilities {
-  /* Professional typography hierarchy */
-  .heading-primary {
-    font-family: 'Tomorrow', sans-serif;
-    font-weight: 700;
-    font-size: var(--text-4xl);
-    line-height: 1.1;
-    letter-spacing: -0.02em;
-    color: hsl(var(--foreground));
-  }
-
-  .heading-secondary {
-    font-family: 'Tomorrow', sans-serif;
-    font-weight: 600;
-    font-size: var(--text-2xl);
-    line-height: 1.3;
-    color: hsl(var(--foreground));
-  }
-
-  .heading-tertiary {
-    font-family: 'Tomorrow', sans-serif;
-    font-weight: 600;
-    font-size: var(--text-xl);
-    line-height: 1.4;
-    color: hsl(var(--foreground));
-  }
-
-  .body-large {
-    font-family: 'Tomorrow', sans-serif;
-    font-weight: 400;
-    font-size: var(--text-lg);
-    line-height: 1.6;
-    color: hsl(var(--muted-foreground));
-  }
-
-  .body-regular {
-    font-family: 'Tomorrow', sans-serif;
-    font-weight: 400;
-    font-size: var(--text-base);
-    line-height: 1.6;
-    color: hsl(var(--muted-foreground));
-  }
-
-  /* Text line clamping utilities */
-  .line-clamp-1 {
-    overflow: hidden;
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 1;
-  }
-
-  .line-clamp-2 {
-    overflow: hidden;
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    -webkit-line-clamp: 2;
-  }
-
   .line-clamp-3 {
-    overflow: hidden;
     display: -webkit-box;
-    -webkit-box-orient: vertical;
     -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
 }
 

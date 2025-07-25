@@ -1,16 +1,16 @@
 import { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Menu, X, Brain, Users, Target, Mail, LogIn, LogOut, User } from 'lucide-react';
+import { Menu, X, Brain, Users, Target, Mail } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
-import { useAuth } from '@/contexts/AuthContext';
+import PinModal from '@/components/admin/PinModal';
 import drakoLogo from '@/assets/drakoyuda_simbolo.png';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [showPinModal, setShowPinModal] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
-  const { user, isAdmin, signOut } = useAuth();
 
   const navItems = [
     { href: '/', label: 'Início', icon: Brain, isScroll: false },
@@ -55,7 +55,7 @@ const Header = () => {
               src="/lovable-uploads/eae753cf-d742-4daa-a23d-e1113b1cfa33.png" 
               alt="DrakoYuda Soluções" 
               className="h-10 w-10 sm:h-12 sm:w-12 object-contain transition-transform duration-300 group-hover:scale-110 cursor-pointer rounded-lg"
-              onClick={() => navigate("/")}
+              onClick={() => setShowPinModal(true)}
             />
             <div className="absolute inset-0 bg-accent/20 rounded-lg scale-0 group-hover:scale-125 transition-transform duration-300" />
           </div>
@@ -91,39 +91,6 @@ const Header = () => {
         {/* Theme Toggle & CTA Button */}
         <div className="hidden md:flex items-center space-x-4">
           <ThemeToggle />
-          
-          {user ? (
-            <div className="flex items-center space-x-2">
-              {isAdmin && (
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => navigate("/admin")}
-                >
-                  <User className="h-4 w-4 mr-2" />
-                  Admin
-                </Button>
-              )}
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={signOut}
-              >
-                <LogOut className="h-4 w-4 mr-2" />
-                Sair
-              </Button>
-            </div>
-          ) : (
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={() => navigate("/auth")}
-            >
-              <LogIn className="h-4 w-4 mr-2" />
-              Entrar
-            </Button>
-          )}
-          
           <Button 
             variant="outline" 
             size="sm"
@@ -170,51 +137,6 @@ const Header = () => {
               <div className="flex justify-center">
                 <ThemeToggle />
               </div>
-              
-              {user ? (
-                <div className="space-y-2">
-                  {isAdmin && (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="w-full"
-                      onClick={() => {
-                        setIsMenuOpen(false);
-                        navigate("/admin");
-                      }}
-                    >
-                      <User className="h-4 w-4 mr-2" />
-                      Admin
-                    </Button>
-                  )}
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="w-full"
-                    onClick={() => {
-                      setIsMenuOpen(false);
-                      signOut();
-                    }}
-                  >
-                    <LogOut className="h-4 w-4 mr-2" />
-                    Sair
-                  </Button>
-                </div>
-              ) : (
-                <Button
-                  size="sm"
-                  variant="outline"
-                  className="w-full"
-                  onClick={() => {
-                    setIsMenuOpen(false);
-                    navigate("/auth");
-                  }}
-                >
-                  <LogIn className="h-4 w-4 mr-2" />
-                  Entrar
-                </Button>
-              )}
-              
               <Button 
                 className="w-full justify-center border-accent/30 text-accent hover:bg-accent/10" 
                 variant="outline"
@@ -229,6 +151,12 @@ const Header = () => {
           </nav>
         </div>
       )}
+      
+      <PinModal
+        isOpen={showPinModal}
+        onClose={() => setShowPinModal(false)}
+        onSuccess={() => navigate('/admin')}
+      />
     </header>
   );
 };

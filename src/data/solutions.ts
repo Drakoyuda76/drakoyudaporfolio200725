@@ -39,9 +39,9 @@ export const realPortfolioData: Solution[] = [
     timesSaved: 1200,
     usersImpacted: 150,
     images: [
-      { id: '1', title: 'Interface de relatório contabilístico automatizado', description: 'Dashboard principal da Ana Lista', imageUrl: '' },
-      { id: '2', title: 'Dashboard de análise financeira', description: 'Análise avançada de dados', imageUrl: '' },
-      { id: '3', title: 'Processo de conversão de balancetes', description: 'Fluxo automatizado', imageUrl: '' }
+      { id: '1', title: 'Interface de relatório contabilístico automatizado', description: 'Dashboard principal da Ana Lista', colorScheme: 'from-blue-600 to-blue-700' },
+      { id: '2', title: 'Dashboard de análise financeira', description: 'Análise avançada de dados', colorScheme: 'from-indigo-600 to-blue-600' },
+      { id: '3', title: 'Processo de conversão de balancetes', description: 'Fluxo automatizado', colorScheme: 'from-cyan-600 to-blue-600' }
     ],
     createdAt: new Date('2024-01-15'),
     updatedAt: new Date('2024-07-20'),
@@ -60,9 +60,9 @@ export const realPortfolioData: Solution[] = [
     timesSaved: 800,
     usersImpacted: 500,
     images: [
-      { id: '1', title: 'Interface de chat com IA', description: 'Chat interface do BotBwala', imageUrl: '' },
-      { id: '2', title: 'Assistente IA respondendo perguntas', description: 'IA em ação', imageUrl: '' },
-      { id: '3', title: 'Funcionalidades de IA disponíveis', description: 'Menu de funcionalidades', imageUrl: '' }
+      { id: '1', title: 'Interface de chat com IA', description: 'Chat interface do BotBwala', colorScheme: 'from-green-500 to-green-600' },
+      { id: '2', title: 'Assistente IA respondendo perguntas', description: 'IA em ação', colorScheme: 'from-emerald-500 to-green-500' },
+      { id: '3', title: 'Funcionalidades de IA disponíveis', description: 'Menu de funcionalidades', colorScheme: 'from-teal-500 to-green-500' }
     ],
     createdAt: new Date('2024-02-10'),
     updatedAt: new Date('2024-07-20'),
@@ -81,9 +81,9 @@ export const realPortfolioData: Solution[] = [
     timesSaved: 600,
     usersImpacted: 1200,
     images: [
-      { id: '1', title: 'App móvel de reserva de táxi', description: 'Interface mobile do KendaNet', imageUrl: '' },
-      { id: '2', title: 'Mapa de rotas comunitárias', description: 'Sistema de rotas', imageUrl: '' },
-      { id: '3', title: 'Dashboard para motoristas', description: 'Painel do motorista', imageUrl: '' }
+      { id: '1', title: 'App móvel de reserva de táxi', description: 'Interface mobile do KendaNet', colorScheme: 'from-orange-500 to-orange-600' },
+      { id: '2', title: 'Mapa de rotas comunitárias', description: 'Sistema de rotas', colorScheme: 'from-amber-500 to-orange-500' },
+      { id: '3', title: 'Dashboard para motoristas', description: 'Painel do motorista', colorScheme: 'from-red-500 to-orange-500' }
     ],
     createdAt: new Date('2024-03-05'),
     updatedAt: new Date('2024-07-20'),
@@ -102,9 +102,9 @@ export const realPortfolioData: Solution[] = [
     timesSaved: 2000,
     usersImpacted: 300,
     images: [
-      { id: '1', title: 'Plataforma white-label customizada', description: 'Interface personalizável', imageUrl: '' },
-      { id: '2', title: 'Interface de formação com IA', description: 'Sistema de formação', imageUrl: '' },
-      { id: '3', title: 'Dashboard de gestão de conteúdos', description: 'Gestão de conteúdo', imageUrl: '' }
+      { id: '1', title: 'Plataforma white-label customizada', description: 'Interface personalizável', colorScheme: 'from-purple-500 to-purple-600' },
+      { id: '2', title: 'Interface de formação com IA', description: 'Sistema de formação', colorScheme: 'from-indigo-500 to-purple-500' },
+      { id: '3', title: 'Dashboard de gestão de conteúdos', description: 'Gestão de conteúdo', colorScheme: 'from-violet-500 to-purple-500' }
     ],
     createdAt: new Date('2024-03-20'),
     updatedAt: new Date('2024-07-20'),
@@ -123,9 +123,9 @@ export const realPortfolioData: Solution[] = [
     timesSaved: 1500,
     usersImpacted: 800,
     images: [
-      { id: '1', title: 'App de gestão financeira mobile', description: 'Interface mobile do Nelinho', imageUrl: '' },
-      { id: '2', title: 'Interface de chat para entrada de dados', description: 'Chat para dados financeiros', imageUrl: '' },
-      { id: '3', title: 'Relatórios financeiros simplificados', description: 'Relatórios automáticos', imageUrl: '' }
+      { id: '1', title: 'App de gestão financeira mobile', description: 'Interface mobile do Nelinho', colorScheme: 'from-yellow-500 to-yellow-600' },
+      { id: '2', title: 'Interface de chat para entrada de dados', description: 'Chat para dados financeiros', colorScheme: 'from-amber-500 to-yellow-500' },
+      { id: '3', title: 'Relatórios financeiros simplificados', description: 'Relatórios automáticos', colorScheme: 'from-orange-400 to-yellow-500' }
     ],
     createdAt: new Date('2024-04-10'),
     updatedAt: new Date('2024-07-20'),
@@ -144,9 +144,9 @@ export const realPortfolioData: Solution[] = [
     timesSaved: 0,
     usersImpacted: 0,
     images: [
-      { id: '1', title: 'Diagrama conceitual mestre-especialista', description: 'Arquitectura conceitual', imageUrl: '' },
-      { id: '2', title: 'Interface de IA colaborativa', description: 'Interface multi-agente', imageUrl: '' },
-      { id: '3', title: 'Fluxo de trabalho de agentes IA', description: 'Fluxo colaborativo', imageUrl: '' }
+      { id: '1', title: 'Diagrama conceitual mestre-especialista', description: 'Arquitectura conceitual', colorScheme: 'from-gray-500 to-gray-600' },
+      { id: '2', title: 'Interface de IA colaborativa', description: 'Interface multi-agente', colorScheme: 'from-slate-500 to-gray-500' },
+      { id: '3', title: 'Fluxo de trabalho de agentes IA', description: 'Fluxo colaborativo', colorScheme: 'from-zinc-500 to-gray-500' }
     ],
     createdAt: new Date('2024-05-01'),
     updatedAt: new Date('2024-07-20'),
@@ -165,9 +165,9 @@ export const realPortfolioData: Solution[] = [
     timesSaved: 600,
     usersImpacted: 200,
     images: [
-      { id: '1', title: 'Dashboard de análise de contratos', description: 'Análise automática', imageUrl: '' },
-      { id: '2', title: 'Alertas de prazos e obrigações', description: 'Sistema de alertas', imageUrl: '' },
-      { id: '3', title: 'Relatório de riscos contratuais', description: 'Análise de riscos', imageUrl: '' }
+      { id: '1', title: 'Dashboard de análise de contratos', description: 'Análise automática', colorScheme: 'from-red-600 to-red-700' },
+      { id: '2', title: 'Alertas de prazos e obrigações', description: 'Sistema de alertas', colorScheme: 'from-rose-600 to-red-600' },
+      { id: '3', title: 'Relatório de riscos contratuais', description: 'Análise de riscos', colorScheme: 'from-pink-600 to-red-600' }
     ],
     createdAt: new Date('2024-05-15'),
     updatedAt: new Date('2024-07-20'),
@@ -186,9 +186,9 @@ export const realPortfolioData: Solution[] = [
     timesSaved: 400,
     usersImpacted: 150,
     images: [
-      { id: '1', title: 'Interface de geração de documentos', description: 'Gerador automático', imageUrl: '' },
-      { id: '2', title: 'Templates personalizáveis', description: 'Templates flexíveis', imageUrl: '' },
-      { id: '3', title: 'Documentos gerados automaticamente', description: 'Output automático', imageUrl: '' }
+      { id: '1', title: 'Interface de geração de documentos', description: 'Gerador automático', colorScheme: 'from-cyan-600 to-cyan-700' },
+      { id: '2', title: 'Templates personalizáveis', description: 'Templates flexíveis', colorScheme: 'from-sky-600 to-cyan-600' },
+      { id: '3', title: 'Documentos gerados automaticamente', description: 'Output automático', colorScheme: 'from-blue-500 to-cyan-600' }
     ],
     createdAt: new Date('2024-06-01'),
     updatedAt: new Date('2024-07-20'),
@@ -207,9 +207,9 @@ export const realPortfolioData: Solution[] = [
     timesSaved: 1200,
     usersImpacted: 600,
     images: [
-      { id: '1', title: 'Chatbot integrado em website', description: 'Integração web', imageUrl: '' },
-      { id: '2', title: 'Interface de conversa com cliente', description: 'Chat em tempo real', imageUrl: '' },
-      { id: '3', title: 'Dashboard de gestão de chatbots', description: 'Painel de controlo', imageUrl: '' }
+      { id: '1', title: 'Chatbot integrado em website', description: 'Integração web', colorScheme: 'from-violet-600 to-violet-700' },
+      { id: '2', title: 'Interface de conversa com cliente', description: 'Chat em tempo real', colorScheme: 'from-purple-600 to-violet-600' },
+      { id: '3', title: 'Dashboard de gestão de chatbots', description: 'Painel de controlo', colorScheme: 'from-indigo-600 to-violet-600' }
     ],
     createdAt: new Date('2024-06-15'),
     updatedAt: new Date('2024-07-20'),
@@ -228,9 +228,9 @@ export const realPortfolioData: Solution[] = [
     timesSaved: 900,
     usersImpacted: 400,
     images: [
-      { id: '1', title: 'Agente IA em ação', description: 'IA trabalhando', imageUrl: '' },
-      { id: '2', title: 'Automação de processos', description: 'Processos automatizados', imageUrl: '' },
-      { id: '3', title: 'Dashboard de monitorização', description: 'Monitorização em tempo real', imageUrl: '' }
+      { id: '1', title: 'Agente IA em ação', description: 'IA trabalhando', colorScheme: 'from-teal-600 to-teal-700' },
+      { id: '2', title: 'Automação de processos', description: 'Processos automatizados', colorScheme: 'from-emerald-600 to-teal-600' },
+      { id: '3', title: 'Dashboard de monitorização', description: 'Monitorização em tempo real', colorScheme: 'from-green-600 to-teal-600' }
     ],
     createdAt: new Date('2024-07-01'),
     updatedAt: new Date('2024-07-20'),
@@ -252,9 +252,7 @@ export const getSolutions = (): Solution[] => {
       solutionsInstance = JSON.parse(savedSolutions);
       return solutionsInstance!;
     } catch (error) {
-      if (process.env.NODE_ENV === 'development') {
-        console.error('Failed to parse saved solutions, using real portfolio data');
-      }
+      console.error('Failed to parse saved solutions, using real portfolio data');
     }
   }
   
