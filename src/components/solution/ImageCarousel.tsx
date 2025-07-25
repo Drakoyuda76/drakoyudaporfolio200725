@@ -5,7 +5,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import type { SolutionImage } from '@/types/solution';
 
 interface ImageCarouselProps {
-  images: SolutionImage[];
+  images: string[];
   solutionTitle: string;
 }
 
@@ -26,23 +26,44 @@ const ImageCarousel = ({ images, solutionTitle }: ImageCarouselProps) => {
 
   const currentImage = images[currentIndex];
 
+  if (!images || images.length === 0) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-muted-foreground">Nenhuma imagem disponível</p>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-4">
       {/* Main Display */}
       <Card className="relative overflow-hidden border-border/40 bg-card/50">
         <CardContent className="p-0">
-          <div className={`relative h-80 bg-gradient-to-br ${currentImage?.colorScheme || 'from-gray-600 to-gray-800'} flex items-center justify-center`}>
-            {/* Placeholder Visual Content */}
-            <div className="text-center space-y-4 p-8">
-              <div className="w-16 h-16 mx-auto bg-white/20 rounded-xl flex items-center justify-center">
-                <Play className="h-8 w-8 text-white" />
+          <div className="relative h-80 bg-gradient-to-br from-gray-600 to-gray-800 flex items-center justify-center overflow-hidden">
+            {/* Actual Image Display */}
+            <img 
+              src={currentImage} 
+              alt={`${solutionTitle} - Imagem ${currentIndex + 1}`}
+              className="w-full h-full object-cover"
+              onError={(e) => {
+                // Fallback to placeholder if image fails to load
+                e.currentTarget.style.display = 'none';
+              }}
+            />
+            
+            {/* Fallback Content */}
+            <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-gray-600 to-gray-800">
+              <div className="text-center space-y-4 p-8">
+                <div className="w-16 h-16 mx-auto bg-white/20 rounded-xl flex items-center justify-center">
+                  <Play className="h-8 w-8 text-white" />
+                </div>
+                <h3 className="text-xl font-tomorrow font-semibold text-white">
+                  {solutionTitle}
+                </h3>
+                <p className="text-white/80 text-sm max-w-xs">
+                  Demonstração da solução
+                </p>
               </div>
-              <h3 className="text-xl font-tomorrow font-semibold text-white">
-                {currentImage?.title}
-              </h3>
-              <p className="text-white/80 text-sm max-w-xs">
-                {currentImage?.description}
-              </p>
             </div>
 
             {/* Navigation Arrows */}
@@ -80,7 +101,7 @@ const ImageCarousel = ({ images, solutionTitle }: ImageCarouselProps) => {
         <div className="flex space-x-2 overflow-x-auto pb-2">
           {images.map((image, index) => (
             <button
-              key={image.id}
+              key={index}
               onClick={() => goToImage(index)}
               className={`flex-shrink-0 relative ${
                 index === currentIndex
@@ -88,13 +109,15 @@ const ImageCarousel = ({ images, solutionTitle }: ImageCarouselProps) => {
                   : 'hover:ring-1 hover:ring-accent/50 hover:ring-offset-1 hover:ring-offset-background'
               } rounded-lg overflow-hidden transition-all duration-200`}
             >
-              <div className={`w-20 h-16 bg-gradient-to-br ${image.colorScheme} flex items-center justify-center`}>
-                <div className="w-6 h-6 bg-white/30 rounded-md flex items-center justify-center">
-                  <Play className="h-3 w-3 text-white" />
-                </div>
+              <div className="w-20 h-16 overflow-hidden rounded-lg">
+                <img
+                  src={image}
+                  alt={`Thumbnail ${index + 1}`}
+                  className="w-full h-full object-cover"
+                />
               </div>
               {index === currentIndex && (
-                <div className="absolute inset-0 bg-accent/20" />
+                <div className="absolute inset-0 bg-accent/20 rounded-lg" />
               )}
             </button>
           ))}
@@ -103,8 +126,8 @@ const ImageCarousel = ({ images, solutionTitle }: ImageCarouselProps) => {
 
       {/* Image Details */}
       <div className="text-center space-y-2">
-        <h4 className="font-medium text-foreground">{currentImage?.title}</h4>
-        <p className="text-sm text-muted-foreground">{currentImage?.description}</p>
+        <h4 className="font-medium text-foreground">{solutionTitle}</h4>
+        <p className="text-sm text-muted-foreground">Imagem {currentIndex + 1} de {images.length}</p>
       </div>
     </div>
   );

@@ -1,9 +1,10 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Clock, Users, Globe } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { getStatusLabel, getStatusColor } from '@/data/solutions';
+import { supabase } from '@/integrations/supabase/client';
 import type { Solution } from '@/types/solution';
 
 interface SolutionCardProps {
@@ -12,6 +13,43 @@ interface SolutionCardProps {
 }
 
 const SolutionCard: React.FC<SolutionCardProps> = ({ solution, index }) => {
+  const [iconUrl, setIconUrl] = useState<string | null>(null);
+  const [images, setImages] = useState<string[]>([]);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  useEffect(() => {
+    loadSolutionAssets();
+  }, [solution.id]);
+
+  useEffect(() => {
+    if (images.length > 1) {
+      const interval = setInterval(() => {
+        setCurrentImageIndex((prev) => (prev + 1) % images.length);
+      }, 3000); // Change image every 3 seconds
+      return () => clearInterval(interval);
+    }
+  }, [images.length]);
+
+  const loadSolutionAssets = async () => {
+    try {
+      // Load icon URL
+      if (solution.images && solution.images.length > 0) {
+        const iconImage = solution.images[0];
+        if (iconImage && typeof iconImage === 'string') {
+          setIconUrl(iconImage);
+        }
+      }
+
+      // Load images from images array
+      if (solution.images && solution.images.length > 0) {
+        const imageUrls = solution.images.filter(img => typeof img === 'string') as string[];
+        setImages(imageUrls);
+      }
+    } catch (error) {
+      console.error('Error loading solution assets:', error);
+    }
+  };
+
   // Get status-based gradient for visual consistency
   const getCardGradient = (status: string) => {
     const statusGradients = {
@@ -51,10 +89,14 @@ const SolutionCard: React.FC<SolutionCardProps> = ({ solution, index }) => {
       <div className="p-6 border-b border-gray-100 dark:border-gray-700">
         <div className="flex items-center space-x-4">
           {/* Solution Icon/Logo */}
-          <div className={`w-12 h-12 rounded-lg bg-gradient-to-br ${getCardGradient(solution.status)} flex items-center justify-center shadow-lg`}>
-            <span className="text-white text-xl">
-              {getSolutionIcon(solution.title)}
-            </span>
+          <div className={`w-12 h-12 rounded-lg bg-gradient-to-br ${getCardGradient(solution.status)} flex items-center justify-center shadow-lg overflow-hidden`}>
+            {iconUrl ? (
+              <img src={iconUrl} alt={solution.title} className="w-full h-full object-cover" />
+            ) : (
+              <span className="text-white text-xl">
+                {getSolutionIcon(solution.title)}
+              </span>
+            )}
           </div>
           
           {/* Solution Info */}

@@ -15,6 +15,7 @@ import type { Solution, SolutionStatus, BusinessArea } from '@/types/solution';
 const SolutionDetail = () => {
   const { id } = useParams<{ id: string }>();
   const [solution, setSolution] = useState<Solution | null>(null);
+  const [images, setImages] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -34,6 +35,10 @@ const SolutionDetail = () => {
       if (error) throw error;
 
       if (data) {
+        // Extract images URLs
+        const imageUrls = data.images_urls || [];
+        setImages(imageUrls);
+
         const formattedSolution: Solution = {
           id: data.id,
           title: data.title,
@@ -197,7 +202,7 @@ const SolutionDetail = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <ImageCarousel images={solution.images} solutionTitle={solution.title} />
+                <ImageCarousel images={images} solutionTitle={solution.title} />
               </CardContent>
             </Card>
 

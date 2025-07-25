@@ -21,15 +21,7 @@ const SolutionsPage = () => {
             </Link>
           </div>
 
-          <div className="text-center mb-12">
-            <h1 className="text-4xl font-bold text-foreground mb-4">
-              As Nossas Soluções
-            </h1>
-            <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
-              Cada solução da DrakoYuda é desenvolvida para resolver desafios reais em Angola, 
-              usando inteligência artificial human-cêntrica que coloca as pessoas no centro da inovação.
-            </p>
-          </div>
+          {/* Título removido para evitar duplicação - está no SolutionsGrid */}
           
           {/* Complete solutions grid */}
           <SolutionsGrid />
