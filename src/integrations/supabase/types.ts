@@ -100,6 +100,36 @@ export type Database = {
         }
         Relationships: []
       }
+      admin_users: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          email: string
+          id: string
+          is_active: boolean | null
+          role: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          email: string
+          id?: string
+          is_active?: boolean | null
+          role?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          email?: string
+          id?: string
+          is_active?: boolean | null
+          role?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       app_settings: {
         Row: {
           category: string | null
@@ -1144,6 +1174,63 @@ export type Database = {
           },
         ]
       }
+      solutions: {
+        Row: {
+          business_area_impact: string[] | null
+          created_at: string | null
+          created_by: string | null
+          description: string | null
+          human_impact: string | null
+          id: string
+          images: string[] | null
+          problem_solution: string | null
+          sdg_goals: number[] | null
+          status: string | null
+          subtitle: string | null
+          sustainability_impact: string | null
+          times_saved: string | null
+          title: string
+          updated_at: string | null
+          users_impacted: string | null
+        }
+        Insert: {
+          business_area_impact?: string[] | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          human_impact?: string | null
+          id?: string
+          images?: string[] | null
+          problem_solution?: string | null
+          sdg_goals?: number[] | null
+          status?: string | null
+          subtitle?: string | null
+          sustainability_impact?: string | null
+          times_saved?: string | null
+          title: string
+          updated_at?: string | null
+          users_impacted?: string | null
+        }
+        Update: {
+          business_area_impact?: string[] | null
+          created_at?: string | null
+          created_by?: string | null
+          description?: string | null
+          human_impact?: string | null
+          id?: string
+          images?: string[] | null
+          problem_solution?: string | null
+          sdg_goals?: number[] | null
+          status?: string | null
+          subtitle?: string | null
+          sustainability_impact?: string | null
+          times_saved?: string | null
+          title?: string
+          updated_at?: string | null
+          users_impacted?: string | null
+        }
+        Relationships: []
+      }
       state_views: {
         Row: {
           id: string
@@ -2081,6 +2168,10 @@ export type Database = {
         Returns: boolean
       }
       user_has_permission: {
+        Args: { p_user_id: string; p_feature_key: string }
+        Returns: boolean
+      }
+      user_has_permission_strict: {
         Args: { p_user_id: string; p_feature_key: string }
         Returns: boolean
       }

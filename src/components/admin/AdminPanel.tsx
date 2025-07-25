@@ -1,16 +1,38 @@
 
-import { useState } from 'react';
-import { getSolutions, updateSolutions } from '@/data/solutions';
-import { saveSolutions, loadSolutions, exportSolutionsAsJSON } from '@/utils/storage';
+import { useState, useEffect } from 'react';
+import { useToast } from '@/hooks/use-toast';
+import type { Solution } from '@/types/solution';
+import { getSolutionsFromDB, saveSolutionToDB, deleteSolutionFromDB } from '@/utils/solutionService';
+import { exportSolutionsAsJSON } from '@/utils/storage';
 import AdminPanelHeader from './AdminPanelHeader';
 import SolutionRowItem from './SolutionRowItem';
 import SolutionEditSheet from './SolutionEditSheet';
-import type { Solution } from '@/types/solution';
 
 const AdminPanel = () => {
-  const [localSolutions, setLocalSolutions] = useState<Solution[]>(() => getSolutions());
+  const [localSolutions, setLocalSolutions] = useState<Solution[]>([]);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
   const [editingSolution, setEditingSolution] = useState<Partial<Solution> | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    const loadSolutions = async () => {
+      try {
+        const solutions = await getSolutionsFromDB();
+        setLocalSolutions(solutions);
+      } catch (error) {
+        toast({
+          variant: "destructive",
+          title: "Erro",
+          description: "Não foi possível carregar as soluções.",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadSolutions();
+  }, [toast]);
 
   const handleEdit = (solution: Solution) => {
     setEditingSolution(solution);
@@ -22,25 +44,55 @@ const AdminPanel = () => {
     setIsSheetOpen(true);
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
     if (confirm('Tem certeza que deseja excluir esta solução?')) {
-      const updatedSolutions = localSolutions.filter(s => s.id !== id);
-      setLocalSolutions(updatedSolutions);
-      updateSolutions(updatedSolutions);
-      saveSolutions(updatedSolutions);
+      try {
+        const success = await deleteSolutionFromDB(id);
+        if (success) {
+          const updatedSolutions = localSolutions.filter(solution => solution.id !== id);
+          setLocalSolutions(updatedSolutions);
+          toast({
+            title: "Sucesso!",
+            description: "Solução excluída com sucesso.",
+          });
+        } else {
+          throw new Error('Falha ao excluir');
+        }
+      } catch (error) {
+        toast({
+          variant: "destructive",
+          title: "Erro",
+          description: "Não foi possível excluir a solução.",
+        });
+      }
     }
   };
 
-  const handleSave = (solutionToSave: Solution) => {
-    let updatedSolutions: Solution[];
-    if (localSolutions.some(s => s.id === solutionToSave.id)) {
-      updatedSolutions = localSolutions.map(s => s.id === solutionToSave.id ? solutionToSave : s);
-    } else {
-      updatedSolutions = [...localSolutions, solutionToSave];
+  const handleSave = async (solutionToSave: Solution) => {
+    try {
+      const success = await saveSolutionToDB(solutionToSave);
+      if (success) {
+        const existingIndex = localSolutions.findIndex(s => s.id === solutionToSave.id);
+        let updatedSolutions;
+        
+        if (existingIndex >= 0) {
+          updatedSolutions = [...localSolutions];
+          updatedSolutions[existingIndex] = solutionToSave;
+        } else {
+          updatedSolutions = [...localSolutions, solutionToSave];
+        }
+        
+        setLocalSolutions(updatedSolutions);
+      } else {
+        throw new Error('Falha ao salvar');
+      }
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: "Não foi possível salvar a solução.",
+      });
     }
-    setLocalSolutions(updatedSolutions);
-    updateSolutions(updatedSolutions);
-    saveSolutions(updatedSolutions);
   };
 
   const handleExportData = () => {
@@ -55,7 +107,7 @@ const AdminPanel = () => {
   };
 
   const validatePortfolioContent = () => {
-    const solutions = loadSolutions();
+    const solutions = localSolutions;
     const issues: string[] = [];
 
     if (!solutions || solutions.length === 0) {
@@ -85,6 +137,14 @@ const AdminPanel = () => {
   };
 
   const totalHoursSaved = localSolutions.reduce((sum, solution) => sum + solution.timesSaved, 0);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">

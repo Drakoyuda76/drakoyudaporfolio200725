@@ -1,7 +1,14 @@
 import { supabase } from '@/integrations/supabase/client';
+import { fileUploadSchema } from '@/lib/validations';
 
 export const uploadSolutionImage = async (file: File): Promise<string | null> => {
   try {
+    // Validate file
+    const validation = fileUploadSchema.safeParse({ file });
+    if (!validation.success) {
+      throw new Error(validation.error.issues[0].message);
+    }
+
     const fileExt = file.name.split('.').pop();
     const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
     const filePath = `solution-images/${fileName}`;

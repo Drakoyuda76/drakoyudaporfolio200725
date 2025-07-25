@@ -16,7 +16,10 @@ import AboutPage from "./pages/AboutPage";
 import ContactPage from "./pages/ContactPage";
 import SolutionDetail from "./pages/SolutionDetail";
 import AdminPanel from "./components/admin/AdminPanel";
+import AuthPage from "./pages/AuthPage";
 import NotFound from "./pages/NotFound";
+import { AuthProvider } from "./contexts/AuthContext";
+import ProtectedRoute from "./components/auth/ProtectedRoute";
 import { AlertTriangle } from "lucide-react";
 import { Link } from "react-router-dom";
 
@@ -71,23 +74,33 @@ function App() {
       <HelmetProvider>
         <ThemeProvider>
           <TooltipProvider>
-            <ErrorBoundary FallbackComponent={ErrorFallback}>
-              <Toaster />
-              <Sonner />
-              <BrowserRouter>
-              <Routes>
-                <Route path="/" element={<HomePage />} />
-                <Route path="/solucoes" element={<SolutionsPage />} />
-                <Route path="/solucoes/:id" element={<SolutionDetail />} />
-                <Route path="/sobre" element={<AboutPage />} />
-                <Route path="/contacto" element={<ContactPage />} />
-                <Route path="/admin" element={<AdminPanel />} />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-              <ScrollToTop />
-              <ChatAssistant />
-              </BrowserRouter>
-            </ErrorBoundary>
+            <AuthProvider>
+              <ErrorBoundary FallbackComponent={ErrorFallback}>
+                <Toaster />
+                <Sonner />
+                <BrowserRouter>
+                <Routes>
+                  <Route path="/" element={<HomePage />} />
+                  <Route path="/solucoes" element={<SolutionsPage />} />
+                  <Route path="/solucoes/:id" element={<SolutionDetail />} />
+                  <Route path="/sobre" element={<AboutPage />} />
+                  <Route path="/contacto" element={<ContactPage />} />
+                  <Route path="/auth" element={<AuthPage />} />
+                  <Route 
+                    path="/admin" 
+                    element={
+                      <ProtectedRoute requireAdmin>
+                        <AdminPanel />
+                      </ProtectedRoute>
+                    } 
+                  />
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+                <ScrollToTop />
+                <ChatAssistant />
+                </BrowserRouter>
+              </ErrorBoundary>
+            </AuthProvider>
           </TooltipProvider>
         </ThemeProvider>
       </HelmetProvider>
