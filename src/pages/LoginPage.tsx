@@ -36,9 +36,10 @@ export default function LoginPage() {
       });
 
       if (error) {
+        console.error('Login error:', error);
         toast({
           title: "Erro de Autenticação",
-          description: "Credenciais inválidas. Apenas administradores autorizados têm acesso.",
+          description: error.message || "Credenciais inválidas. Verifique o email e palavra-passe.",
           variant: "destructive",
         });
         return;
@@ -62,6 +63,7 @@ export default function LoginPage() {
 
       navigate('/admin');
     } catch (error) {
+      console.error('Unexpected error:', error);
       toast({
         title: "Erro",
         description: "Erro inesperado ao fazer login. Tente novamente.",
