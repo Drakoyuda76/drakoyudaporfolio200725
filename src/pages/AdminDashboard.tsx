@@ -102,7 +102,7 @@ export default function AdminDashboard() {
   useEffect(() => {
     // Verificar autenticação
     supabase.auth.getSession().then(({ data: { session } }) => {
-      if (!session || session.user.email !== 'drakoyuda76@gmail.com') {
+      if (!session) {
         navigate('/login');
         return;
       }
@@ -112,7 +112,7 @@ export default function AdminDashboard() {
 
     // Listener para mudanças de auth
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (!session || session.user.email !== 'drakoyuda76@gmail.com') {
+      if (!session) {
         navigate('/login');
       }
     });
@@ -136,27 +136,36 @@ export default function AdminDashboard() {
       const { data: estatisticasData, error: estatisticasError } = await supabase
         .from('estatisticas')
         .select('*')
+        .limit(1)
         .single();
 
-      if (estatisticasError) throw estatisticasError;
+      if (estatisticasError && estatisticasError.code !== 'PGRST116') {
+        console.error('Erro ao carregar estatísticas:', estatisticasError);
+      }
       setEstatisticas(estatisticasData);
 
       // Carregar valores da empresa
       const { data: valoresData, error: valoresError } = await supabase
         .from('valores_empresa')
         .select('*')
+        .limit(1)
         .single();
 
-      if (valoresError) throw valoresError;
+      if (valoresError && valoresError.code !== 'PGRST116') {
+        console.error('Erro ao carregar valores da empresa:', valoresError);
+      }
       setValoresEmpresa(valoresData);
 
       // Carregar contacto
       const { data: contactoData, error: contactoError } = await supabase
         .from('contacto')
         .select('*')
+        .limit(1)
         .single();
 
-      if (contactoError) throw contactoError;
+      if (contactoError && contactoError.code !== 'PGRST116') {
+        console.error('Erro ao carregar contacto:', contactoError);
+      }
       setContacto(contactoData);
 
     } catch (error) {

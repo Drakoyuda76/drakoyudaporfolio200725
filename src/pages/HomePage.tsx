@@ -58,9 +58,12 @@ const HomePage = () => {
       const { data: estatisticasData, error: estatisticasError } = await supabase
         .from('estatisticas')
         .select('*')
+        .limit(1)
         .single();
 
-      if (estatisticasError) throw estatisticasError;
+      if (estatisticasError && estatisticasError.code !== 'PGRST116') {
+        console.error('Erro ao carregar estatísticas:', estatisticasError);
+      }
       setEstatisticas(estatisticasData);
 
     } catch (error) {

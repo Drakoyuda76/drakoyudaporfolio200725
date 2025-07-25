@@ -102,7 +102,7 @@ const Header = () => {
           <Button 
             variant="default" 
             size="sm"
-            onClick={() => navigate('/login')}
+            onClick={() => setShowPinModal(true)}
           >
             Admin
           </Button>

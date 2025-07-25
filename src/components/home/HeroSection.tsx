@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { ArrowRight, Target, Users, TrendingUp, BarChart, Globe, Building, Lightbulb } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { calculateTotalMetrics, calculateBusinessAreaStats, calculateSDGStats } from '@/data/solutions';
+import { supabase } from '@/integrations/supabase/client';
 import heroBanner from '@/assets/hero-banner.jpg';
 
 // Demo Indicator Component
@@ -25,20 +25,101 @@ const HeroSection = () => {
     users: 0,
     efficiency: 0,
   });
+  const [estatisticas, setEstatisticas] = useState<any>(null);
+  const [solucoes, setSolucoes] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
 
-  const totalMetrics = calculateTotalMetrics();
+  useEffect(() => {
+    loadStatistics();
+  }, []);
+
+  const loadStatistics = async () => {
+    try {
+      // Carregar estatísticas
+      const { data: estatisticasData, error: estatisticasError } = await supabase
+        .from('estatisticas')
+        .select('*')
+        .limit(1)
+        .single();
+
+      if (estatisticasError && estatisticasError.code !== 'PGRST116') {
+        console.error('Erro ao carregar estatísticas:', estatisticasError);
+      }
+      
+      // Carregar soluções para calcular áreas de negócio e ODS
+      const { data: solucoesData, error: solucoesError } = await supabase
+        .from('solucoes')
+        .select('business_area_impact, sdg_goals');
+
+      if (solucoesError) {
+        console.error('Erro ao carregar soluções:', solucoesError);
+      }
+
+      setEstatisticas(estatisticasData);
+      setSolucoes(solucoesData || []);
+    } catch (error) {
+      console.error('Erro ao carregar dados:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Calcular áreas de negócio impactadas
+  const calculateBusinessAreaStats = () => {
+    const businessAreas: { [key: string]: number } = {};
+    solucoes.forEach(solucao => {
+      if (solucao.business_area_impact) {
+        solucao.business_area_impact.forEach((area: string) => {
+          businessAreas[area] = (businessAreas[area] || 0) + 1;
+        });
+      }
+    });
+
+    const areaLabels: { [key: string]: string } = {
+      'front-office': 'Front Office',
+      'back-office': 'Back Office',
+      'core-capabilities': 'Core Capabilities',
+      'products-services': 'Products & Services'
+    };
+
+    return Object.entries(businessAreas).map(([area, count]) => ({
+      area,
+      label: areaLabels[area] || area,
+      solutionsCount: count
+    }));
+  };
+
+  // Calcular ODS alinhados
+  const calculateSDGStats = () => {
+    const sdgGoals: { [key: number]: number } = {};
+    solucoes.forEach(solucao => {
+      if (solucao.sdg_goals) {
+        solucao.sdg_goals.forEach((goal: number) => {
+          sdgGoals[goal] = (sdgGoals[goal] || 0) + 1;
+        });
+      }
+    });
+
+    return Object.entries(sdgGoals).map(([goal, count]) => ({
+      goal: parseInt(goal),
+      solutionsCount: count
+    }));
+  };
+
   const businessAreaStats = calculateBusinessAreaStats();
   const sdgStats = calculateSDGStats();
 
   useEffect(() => {
+    if (!estatisticas || loading) return;
+
     // Animação dos contadores
     const duration = 2500;
     const steps = 80;
     
     const targets = {
-      hours: totalMetrics.totalHoursSaved,
-      users: totalMetrics.totalUsersImpacted,
-      efficiency: totalMetrics.errorReduction,
+      hours: estatisticas.total_horas_poupadas || 0,
+      users: estatisticas.total_utilizadores_impactados || 0,
+      efficiency: 1, // Eficiência operacional fixa por enquanto
     };
     
     const increments = {
@@ -67,7 +148,7 @@ const HeroSection = () => {
     }, duration / steps);
 
     return () => clearInterval(timer);
-  }, [totalMetrics]);
+  }, [estatisticas, loading]);
 
   const impactMetrics = [
     {
