@@ -5,6 +5,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { 
   BarChart3, 
   Plus, 
@@ -18,10 +21,24 @@ import {
   Mail,
   Edit,
   Trash2,
-  Upload
+  Upload,
+  Search,
+  Shield
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
+import SolutionForm from '@/components/admin/SolutionForm';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface Solucao {
   id: string;
@@ -50,12 +67,35 @@ interface Estatisticas {
   parcerias_ativas: number;
 }
 
+interface ValoresEmpresa {
+  missao: string;
+  visao: string;
+  valores: string[];
+  fundacao_ano: number;
+  historia: string;
+}
+
+interface Contacto {
+  email_geral: string;
+  email_parcerias: string;
+  telefone: string;
+  endereco: string;
+  linkedin_url: string;
+}
+
 export default function AdminDashboard() {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [solucoes, setSolucoes] = useState<Solucao[]>([]);
   const [estatisticas, setEstatisticas] = useState<Estatisticas | null>(null);
+  const [valoresEmpresa, setValoresEmpresa] = useState<ValoresEmpresa | null>(null);
+  const [contacto, setContacto] = useState<Contacto | null>(null);
   const [activeTab, setActiveTab] = useState('dashboard');
+  const [showSolutionForm, setShowSolutionForm] = useState(false);
+  const [editingSolution, setEditingSolution] = useState<Solucao | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [newAdminEmail, setNewAdminEmail] = useState('');
+  const [newAdminPassword, setNewAdminPassword] = useState('');
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -101,6 +141,24 @@ export default function AdminDashboard() {
       if (estatisticasError) throw estatisticasError;
       setEstatisticas(estatisticasData);
 
+      // Carregar valores da empresa
+      const { data: valoresData, error: valoresError } = await supabase
+        .from('valores_empresa')
+        .select('*')
+        .single();
+
+      if (valoresError) throw valoresError;
+      setValoresEmpresa(valoresData);
+
+      // Carregar contacto
+      const { data: contactoData, error: contactoError } = await supabase
+        .from('contacto')
+        .select('*')
+        .single();
+
+      if (contactoError) throw contactoError;
+      setContacto(contactoData);
+
     } catch (error) {
       console.error('Erro ao carregar dados:', error);
       toast({
@@ -120,6 +178,155 @@ export default function AdminDashboard() {
       title: "Sessão terminada",
       description: "Até breve!",
     });
+  };
+
+  const handleEditSolution = (solution: Solucao) => {
+    setEditingSolution(solution);
+    setShowSolutionForm(true);
+  };
+
+  const handleDeleteSolution = async (solutionId: string) => {
+    try {
+      const { error } = await supabase
+        .from('solucoes')
+        .delete()
+        .eq('id', solutionId);
+
+      if (error) throw error;
+
+      toast({
+        title: "Solução eliminada",
+        description: "A solução foi eliminada com sucesso.",
+      });
+
+      loadDashboardData();
+    } catch (error) {
+      console.error('Erro ao eliminar solução:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao eliminar a solução.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleSaveSolution = () => {
+    setShowSolutionForm(false);
+    setEditingSolution(null);
+    loadDashboardData();
+  };
+
+  const handleUpdateEstatisticas = async () => {
+    if (!estatisticas) return;
+
+    try {
+      const { error } = await supabase
+        .from('estatisticas')
+        .update(estatisticas)
+        .eq('id', (estatisticas as any).id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Estatísticas atualizadas",
+        description: "As estatísticas foram atualizadas com sucesso.",
+      });
+    } catch (error) {
+      console.error('Erro ao atualizar estatísticas:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao atualizar estatísticas.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleUpdateValoresEmpresa = async () => {
+    if (!valoresEmpresa) return;
+
+    try {
+      const { error } = await supabase
+        .from('valores_empresa')
+        .update(valoresEmpresa)
+        .eq('id', (valoresEmpresa as any).id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Informações da empresa atualizadas",
+        description: "As informações da empresa foram atualizadas com sucesso.",
+      });
+    } catch (error) {
+      console.error('Erro ao atualizar valores da empresa:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao atualizar informações da empresa.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleUpdateContacto = async () => {
+    if (!contacto) return;
+
+    try {
+      const { error } = await supabase
+        .from('contacto')
+        .update(contacto)
+        .eq('id', (contacto as any).id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Contactos atualizados",
+        description: "As informações de contacto foram atualizadas com sucesso.",
+      });
+    } catch (error) {
+      console.error('Erro ao atualizar contacto:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao atualizar contactos.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleAddAdmin = async () => {
+    if (!newAdminEmail || !newAdminPassword) {
+      toast({
+        title: "Erro",
+        description: "Email e senha são obrigatórios.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('admin_users')
+        .insert({
+          email: newAdminEmail,
+          password_hash: newAdminPassword,
+          name: 'Administrador'
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: "Administrador adicionado",
+        description: "Novo administrador foi adicionado com sucesso.",
+      });
+
+      setNewAdminEmail('');
+      setNewAdminPassword('');
+    } catch (error) {
+      console.error('Erro ao adicionar administrador:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao adicionar administrador.",
+        variant: "destructive",
+      });
+    }
   };
 
   const getStatusColor = (status: string) => {
@@ -146,6 +353,11 @@ export default function AdminDashboard() {
     return labels[status as keyof typeof labels] || status;
   };
 
+  const filteredSolutions = solucoes.filter(solution =>
+    solution.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    solution.subtitle.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -153,6 +365,21 @@ export default function AdminDashboard() {
           <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4" />
           <p>A carregar painel administrativo...</p>
         </div>
+      </div>
+    );
+  }
+
+  if (showSolutionForm) {
+    return (
+      <div className="min-h-screen bg-background p-6">
+        <SolutionForm
+          solution={editingSolution}
+          onSave={handleSaveSolution}
+          onCancel={() => {
+            setShowSolutionForm(false);
+            setEditingSolution(null);
+          }}
+        />
       </div>
     );
   }
@@ -178,7 +405,7 @@ export default function AdminDashboard() {
 
       <div className="container mx-auto px-4 py-6">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="dashboard">
               <BarChart3 className="h-4 w-4 mr-2" />
               Dashboard
@@ -198,6 +425,10 @@ export default function AdminDashboard() {
             <TabsTrigger value="contactos">
               <Mail className="h-4 w-4 mr-2" />
               Contactos
+            </TabsTrigger>
+            <TabsTrigger value="admins">
+              <Shield className="h-4 w-4 mr-2" />
+              Admins
             </TabsTrigger>
           </TabsList>
 
@@ -257,6 +488,53 @@ export default function AdminDashboard() {
               </Card>
             </div>
 
+            {/* Editar Estatísticas */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Editar Estatísticas</CardTitle>
+                <CardDescription>
+                  Atualizar métricas principais do dashboard
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                  <div>
+                    <Label>Total Soluções</Label>
+                    <Input
+                      type="number"
+                      value={estatisticas?.total_solucoes || 0}
+                      onChange={(e) => setEstatisticas(prev => prev ? { ...prev, total_solucoes: parseInt(e.target.value) || 0 } : null)}
+                    />
+                  </div>
+                  <div>
+                    <Label>Horas Poupadas</Label>
+                    <Input
+                      type="number"
+                      value={estatisticas?.total_horas_poupadas || 0}
+                      onChange={(e) => setEstatisticas(prev => prev ? { ...prev, total_horas_poupadas: parseInt(e.target.value) || 0 } : null)}
+                    />
+                  </div>
+                  <div>
+                    <Label>Utilizadores Impactados</Label>
+                    <Input
+                      type="number"
+                      value={estatisticas?.total_utilizadores_impactados || 0}
+                      onChange={(e) => setEstatisticas(prev => prev ? { ...prev, total_utilizadores_impactados: parseInt(e.target.value) || 0 } : null)}
+                    />
+                  </div>
+                  <div>
+                    <Label>Parcerias Ativas</Label>
+                    <Input
+                      type="number"
+                      value={estatisticas?.parcerias_ativas || 0}
+                      onChange={(e) => setEstatisticas(prev => prev ? { ...prev, parcerias_ativas: parseInt(e.target.value) || 0 } : null)}
+                    />
+                  </div>
+                </div>
+                <Button onClick={handleUpdateEstatisticas}>Atualizar Estatísticas</Button>
+              </CardContent>
+            </Card>
+
             {/* Gráfico de status das soluções */}
             <Card>
               <CardHeader>
@@ -287,37 +565,97 @@ export default function AdminDashboard() {
           <TabsContent value="solucoes" className="space-y-6">
             <Card>
               <CardHeader>
-                <CardTitle>Todas as Soluções</CardTitle>
-                <CardDescription>
-                  Gerir o portfólio completo de soluções DrakoYuda
-                </CardDescription>
+                <div className="flex justify-between items-center">
+                  <div>
+                    <CardTitle>Todas as Soluções</CardTitle>
+                    <CardDescription>
+                      Gerir o portfólio completo de soluções DrakoYuda
+                    </CardDescription>
+                  </div>
+                  <Button onClick={() => setShowSolutionForm(true)}>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Nova Solução
+                  </Button>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <Search className="h-4 w-4 text-muted-foreground" />
+                  <Input
+                    placeholder="Pesquisar soluções..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="max-w-sm"
+                  />
+                </div>
               </CardHeader>
               <CardContent>
-                <div className="space-y-4">
-                  {solucoes.map((solucao) => (
-                    <div key={solucao.id} className="flex items-center justify-between p-4 border rounded-lg">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-2">
-                          <h3 className="font-semibold">{solucao.title}</h3>
-                          <Badge variant="secondary" className={`${getStatusColor(solucao.status)} text-white`}>
-                            {getStatusLabel(solucao.status)}
-                          </Badge>
+                <div className="grid md:grid-cols-2 gap-6">
+                  {filteredSolutions.map((solucao) => (
+                    <Card key={solucao.id} className="relative">
+                      <CardHeader>
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-2">
+                              <CardTitle className="text-lg">{solucao.title}</CardTitle>
+                              <Badge variant="secondary" className={`${getStatusColor(solucao.status)} text-white`}>
+                                {getStatusLabel(solucao.status)}
+                              </Badge>
+                            </div>
+                            <CardDescription>{solucao.subtitle}</CardDescription>
+                          </div>
+                          <div className="flex gap-2">
+                            <Button variant="outline" size="sm" onClick={() => handleEditSolution(solucao)}>
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <AlertDialog>
+                              <AlertDialogTrigger asChild>
+                                <Button variant="outline" size="sm" className="text-destructive">
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </AlertDialogTrigger>
+                              <AlertDialogContent>
+                                <AlertDialogHeader>
+                                  <AlertDialogTitle>Eliminar Solução</AlertDialogTitle>
+                                  <AlertDialogDescription>
+                                    Tem certeza que deseja eliminar a solução "{solucao.title}"? Esta ação não pode ser desfeita.
+                                  </AlertDialogDescription>
+                                </AlertDialogHeader>
+                                <AlertDialogFooter>
+                                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                  <AlertDialogAction onClick={() => handleDeleteSolution(solucao.id)}>
+                                    Eliminar
+                                  </AlertDialogAction>
+                                </AlertDialogFooter>
+                              </AlertDialogContent>
+                            </AlertDialog>
+                          </div>
                         </div>
-                        <p className="text-sm text-muted-foreground mb-2">{solucao.subtitle}</p>
+                      </CardHeader>
+                      <CardContent>
+                        <p className="text-sm text-muted-foreground mb-4 line-clamp-3">{solucao.description}</p>
                         <div className="flex gap-4 text-xs text-muted-foreground">
-                          <span>{solucao.times_saved}h poupadas</span>
-                          <span>{solucao.users_impacted} utilizadores</span>
+                          <span className="flex items-center gap-1">
+                            <Clock className="h-3 w-3" />
+                            {solucao.times_saved}h poupadas
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Users className="h-3 w-3" />
+                            {solucao.users_impacted} utilizadores
+                          </span>
                         </div>
-                      </div>
-                      <div className="flex gap-2">
-                        <Button variant="outline" size="sm">
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button variant="outline" size="sm" className="text-destructive">
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
+                        {solucao.icon_url && (
+                          <div className="mt-4">
+                            <img src={solucao.icon_url} alt="Ícone" className="w-16 h-16 object-cover rounded" />
+                          </div>
+                        )}
+                        {solucao.images_urls.length > 0 && (
+                          <div className="grid grid-cols-4 gap-2 mt-4">
+                            {solucao.images_urls.slice(0, 4).map((url, index) => (
+                              <img key={index} src={url} alt={`Imagem ${index + 1}`} className="w-full h-12 object-cover rounded" />
+                            ))}
+                          </div>
+                        )}
+                      </CardContent>
+                    </Card>
                   ))}
                 </div>
               </CardContent>
@@ -334,10 +672,10 @@ export default function AdminDashboard() {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="text-center py-8">
-                  <Upload className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                  <p className="text-muted-foreground">Formulário de criação em desenvolvimento...</p>
-                </div>
+                <Button onClick={() => setShowSolutionForm(true)} size="lg" className="w-full">
+                  <Plus className="h-6 w-6 mr-2" />
+                  Criar Nova Solução
+                </Button>
               </CardContent>
             </Card>
           </TabsContent>
@@ -351,11 +689,81 @@ export default function AdminDashboard() {
                   Gerir missão, visão e valores da DrakoYuda
                 </CardDescription>
               </CardHeader>
-              <CardContent>
-                <div className="text-center py-8">
-                  <Building className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                  <p className="text-muted-foreground">Gestão de informações empresariais em desenvolvimento...</p>
+              <CardContent className="space-y-6">
+                <div>
+                  <Label htmlFor="missao">Missão</Label>
+                  <Textarea
+                    id="missao"
+                    value={valoresEmpresa?.missao || ''}
+                    onChange={(e) => setValoresEmpresa(prev => prev ? { ...prev, missao: e.target.value } : null)}
+                    rows={3}
+                  />
                 </div>
+                <div>
+                  <Label htmlFor="visao">Visão</Label>
+                  <Textarea
+                    id="visao"
+                    value={valoresEmpresa?.visao || ''}
+                    onChange={(e) => setValoresEmpresa(prev => prev ? { ...prev, visao: e.target.value } : null)}
+                    rows={3}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="historia">História</Label>
+                  <Textarea
+                    id="historia"
+                    value={valoresEmpresa?.historia || ''}
+                    onChange={(e) => setValoresEmpresa(prev => prev ? { ...prev, historia: e.target.value } : null)}
+                    rows={4}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="fundacao_ano">Ano de Fundação</Label>
+                  <Input
+                    id="fundacao_ano"
+                    type="number"
+                    value={valoresEmpresa?.fundacao_ano || 2024}
+                    onChange={(e) => setValoresEmpresa(prev => prev ? { ...prev, fundacao_ano: parseInt(e.target.value) || 2024 } : null)}
+                  />
+                </div>
+                <div>
+                  <Label>Valores Fundamentais</Label>
+                  <div className="space-y-2 mt-2">
+                    {valoresEmpresa?.valores?.map((valor, index) => (
+                      <div key={index} className="flex gap-2">
+                        <Input
+                          value={valor}
+                          onChange={(e) => {
+                            const newValores = [...(valoresEmpresa?.valores || [])];
+                            newValores[index] = e.target.value;
+                            setValoresEmpresa(prev => prev ? { ...prev, valores: newValores } : null);
+                          }}
+                        />
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            const newValores = valoresEmpresa?.valores?.filter((_, i) => i !== index) || [];
+                            setValoresEmpresa(prev => prev ? { ...prev, valores: newValores } : null);
+                          }}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))}
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        const newValores = [...(valoresEmpresa?.valores || []), ''];
+                        setValoresEmpresa(prev => prev ? { ...prev, valores: newValores } : null);
+                      }}
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Adicionar Valor
+                    </Button>
+                  </div>
+                </div>
+                <Button onClick={handleUpdateValoresEmpresa}>Atualizar Informações da Empresa</Button>
               </CardContent>
             </Card>
           </TabsContent>
@@ -369,11 +777,92 @@ export default function AdminDashboard() {
                   Atualizar informações de contacto e parcerias
                 </CardDescription>
               </CardHeader>
-              <CardContent>
-                <div className="text-center py-8">
-                  <Mail className="h-12 w-12 mx-auto mb-4 text-muted-foreground" />
-                  <p className="text-muted-foreground">Gestão de contactos em desenvolvimento...</p>
+              <CardContent className="space-y-4">
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="email_geral">Email Geral</Label>
+                    <Input
+                      id="email_geral"
+                      type="email"
+                      value={contacto?.email_geral || ''}
+                      onChange={(e) => setContacto(prev => prev ? { ...prev, email_geral: e.target.value } : null)}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="email_parcerias">Email Parcerias</Label>
+                    <Input
+                      id="email_parcerias"
+                      type="email"
+                      value={contacto?.email_parcerias || ''}
+                      onChange={(e) => setContacto(prev => prev ? { ...prev, email_parcerias: e.target.value } : null)}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="telefone">Telefone</Label>
+                    <Input
+                      id="telefone"
+                      value={contacto?.telefone || ''}
+                      onChange={(e) => setContacto(prev => prev ? { ...prev, telefone: e.target.value } : null)}
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="endereco">Endereço</Label>
+                    <Input
+                      id="endereco"
+                      value={contacto?.endereco || ''}
+                      onChange={(e) => setContacto(prev => prev ? { ...prev, endereco: e.target.value } : null)}
+                    />
+                  </div>
+                  <div className="md:col-span-2">
+                    <Label htmlFor="linkedin_url">LinkedIn URL</Label>
+                    <Input
+                      id="linkedin_url"
+                      value={contacto?.linkedin_url || ''}
+                      onChange={(e) => setContacto(prev => prev ? { ...prev, linkedin_url: e.target.value } : null)}
+                    />
+                  </div>
                 </div>
+                <Button onClick={handleUpdateContacto}>Atualizar Contactos</Button>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Gestão de Admins */}
+          <TabsContent value="admins">
+            <Card>
+              <CardHeader>
+                <CardTitle>Gestão de Administradores</CardTitle>
+                <CardDescription>
+                  Adicionar novos administradores ao sistema
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="new_admin_email">Email do Novo Admin</Label>
+                    <Input
+                      id="new_admin_email"
+                      type="email"
+                      value={newAdminEmail}
+                      onChange={(e) => setNewAdminEmail(e.target.value)}
+                      placeholder="admin@drakoyuda.com"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="new_admin_password">Senha</Label>
+                    <Input
+                      id="new_admin_password"
+                      type="password"
+                      value={newAdminPassword}
+                      onChange={(e) => setNewAdminPassword(e.target.value)}
+                      placeholder="Senha forte"
+                    />
+                  </div>
+                </div>
+                <Button onClick={handleAddAdmin}>
+                  <Shield className="h-4 w-4 mr-2" />
+                  Adicionar Administrador
+                </Button>
               </CardContent>
             </Card>
           </TabsContent>
