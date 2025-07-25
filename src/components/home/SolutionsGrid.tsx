@@ -1,15 +1,61 @@
-import { useState } from 'react';
-import { Filter } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Filter, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { getSolutions, getStatusLabel, getBusinessAreaLabel } from '@/data/solutions';
+import { getStatusLabel, getBusinessAreaLabel } from '@/data/solutions';
 import SolutionCard from '@/components/ui/solution-card';
-import type { SolutionStatus, BusinessArea } from '@/types/solution';
+import { supabase } from '@/integrations/supabase/client';
+import type { SolutionStatus, BusinessArea, Solution } from '@/types/solution';
 
 const SolutionsGrid = () => {
   const [statusFilter, setStatusFilter] = useState<SolutionStatus | 'all'>('all');
   const [businessAreaFilter, setBusinessAreaFilter] = useState<BusinessArea | 'all'>('all');
-  const solutions = getSolutions();
+  const [solutions, setSolutions] = useState<Solution[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    loadSolutions();
+  }, []);
+
+  const loadSolutions = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('solucoes')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      const formattedSolutions: Solution[] = (data || []).map(solucao => ({
+        id: solucao.id,
+        title: solucao.title,
+        subtitle: solucao.subtitle,
+        description: solucao.description,
+        status: solucao.status as SolutionStatus,
+        businessAreaImpact: solucao.business_area_impact as BusinessArea[],
+        problemSolution: solucao.problem_solution || '',
+        humanImpact: solucao.human_impact || '',
+        sustainabilityImpact: solucao.sustainability_impact || '',
+        sdgGoals: solucao.sdg_goals || [],
+        timesSaved: solucao.times_saved || 0,
+        usersImpacted: solucao.users_impacted || 0,
+        images: (solucao.images_urls || []).map((url, index) => ({
+          id: `${index + 1}`,
+          title: `Imagem ${index + 1}`,
+          description: `Demonstração da ${solucao.title}`,
+          colorScheme: `from-blue-${500 + index * 100} to-blue-${600 + index * 100}`
+        })),
+        createdAt: new Date(solucao.created_at),
+        updatedAt: new Date(solucao.updated_at)
+      }));
+
+      setSolutions(formattedSolutions);
+    } catch (error) {
+      console.error('Erro ao carregar soluções:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const filteredSolutions = solutions.filter(solution => {
     const statusMatch = statusFilter === 'all' || solution.status === statusFilter;
@@ -73,15 +119,22 @@ const SolutionsGrid = () => {
         </div>
 
         {/* Solutions Grid - Modern Card Layout */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {filteredSolutions.map((solution, index) => (
-            <SolutionCard
-              key={solution.id}
-              solution={solution}
-              index={index}
-            />
-          ))}
-        </div>
+        {loading ? (
+          <div className="flex justify-center items-center py-12">
+            <Loader2 className="h-8 w-8 animate-spin" />
+            <span className="ml-2">A carregar soluções...</span>
+          </div>
+        ) : (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {filteredSolutions.map((solution, index) => (
+              <SolutionCard
+                key={solution.id}
+                solution={solution}
+                index={index}
+              />
+            ))}
+          </div>
+        )}
 
         {filteredSolutions.length === 0 && (
           <div className="text-center py-12">

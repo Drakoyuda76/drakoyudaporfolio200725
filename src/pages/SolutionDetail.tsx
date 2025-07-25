@@ -1,5 +1,6 @@
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, Clock, Users, Target, Globe, Mail, ExternalLink } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { ArrowLeft, Clock, Users, Target, Globe, Mail, ExternalLink, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -7,12 +8,63 @@ import { Separator } from '@/components/ui/separator';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import Header from '@/components/layout/Header';
 import ImageCarousel from '@/components/solution/ImageCarousel';
-import { getSolutions, getStatusLabel, getStatusColor, getBusinessAreaLabel } from '@/data/solutions';
+import { getStatusLabel, getStatusColor, getBusinessAreaLabel } from '@/data/solutions';
+import { supabase } from '@/integrations/supabase/client';
+import type { Solution, SolutionStatus, BusinessArea } from '@/types/solution';
 
 const SolutionDetail = () => {
   const { id } = useParams<{ id: string }>();
-  const solutions = getSolutions();
-  const solution = solutions.find(s => s.id === id);
+  const [solution, setSolution] = useState<Solution | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (id) {
+      loadSolution();
+    }
+  }, [id]);
+
+  const loadSolution = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('solucoes')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+      if (error) throw error;
+
+      if (data) {
+        const formattedSolution: Solution = {
+          id: data.id,
+          title: data.title,
+          subtitle: data.subtitle,
+          description: data.description,
+          status: data.status as SolutionStatus,
+          businessAreaImpact: data.business_area_impact as BusinessArea[],
+          problemSolution: data.problem_solution || '',
+          humanImpact: data.human_impact || '',
+          sustainabilityImpact: data.sustainability_impact || '',
+          sdgGoals: data.sdg_goals || [],
+          timesSaved: data.times_saved || 0,
+          usersImpacted: data.users_impacted || 0,
+          images: (data.images_urls || []).map((url, index) => ({
+            id: `${index + 1}`,
+            title: `Imagem ${index + 1}`,
+            description: `Demonstração da ${data.title}`,
+            colorScheme: `from-blue-${500 + index * 100} to-blue-${600 + index * 100}`
+          })),
+          createdAt: new Date(data.created_at),
+          updatedAt: new Date(data.updated_at)
+        };
+
+        setSolution(formattedSolution);
+      }
+    } catch (error) {
+      console.error('Erro ao carregar solução:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Safe date formatting function
   const formatDate = (dateValue: string | Date | undefined) => {
@@ -38,6 +90,18 @@ const SolutionDetail = () => {
     }
   };
 
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header />
+        <div className="container py-20 text-center">
+          <Loader2 className="h-8 w-8 animate-spin mx-auto" />
+          <p className="mt-4 text-muted-foreground">A carregar solução...</p>
+        </div>
+      </div>
+    );
+  }
+
   if (!solution) {
     return (
       <div className="min-h-screen bg-background">
@@ -46,10 +110,10 @@ const SolutionDetail = () => {
           <h1 className="text-2xl font-tomorrow font-semibold text-foreground mb-4">
             Solução não encontrada
           </h1>
-          <Link to="/">
+          <Link to="/solucoes">
             <Button variant="outline">
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Voltar ao Início
+              Voltar às Soluções
             </Button>
           </Link>
         </div>
@@ -78,12 +142,14 @@ const SolutionDetail = () => {
         <div className="flex items-center space-x-2 text-sm text-muted-foreground mb-8">
           <Link to="/" className="hover:text-accent transition-colors">Início</Link>
           <span>/</span>
+          <Link to="/solucoes" className="hover:text-accent transition-colors">Soluções</Link>
+          <span>/</span>
           <span className="text-foreground">{solution.title}</span>
         </div>
 
         {/* Back Button */}
         <div className="mb-6">
-          <Link to="/">
+          <Link to="/solucoes">
             <Button variant="outline" size="sm">
               <ArrowLeft className="mr-2 h-4 w-4" />
               Voltar às Soluções
