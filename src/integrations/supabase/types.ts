@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_logs: {
+        Row: {
+          action: string
+          admin_email: string
+          created_at: string
+          details: Json | null
+          id: string
+          record_id: string | null
+          table_name: string | null
+        }
+        Insert: {
+          action: string
+          admin_email: string
+          created_at?: string
+          details?: Json | null
+          id?: string
+          record_id?: string | null
+          table_name?: string | null
+        }
+        Update: {
+          action?: string
+          admin_email?: string
+          created_at?: string
+          details?: Json | null
+          id?: string
+          record_id?: string | null
+          table_name?: string | null
+        }
+        Relationships: []
+      }
       admin_users: {
         Row: {
           created_at: string | null
@@ -65,6 +95,36 @@ export type Database = {
           last_login?: string | null
           password_hash?: string
           username?: string
+        }
+        Relationships: []
+      }
+      contacto: {
+        Row: {
+          email_geral: string | null
+          email_parcerias: string | null
+          endereco: string | null
+          id: string
+          linkedin_url: string | null
+          telefone: string | null
+          updated_at: string
+        }
+        Insert: {
+          email_geral?: string | null
+          email_parcerias?: string | null
+          endereco?: string | null
+          id?: string
+          linkedin_url?: string | null
+          telefone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          email_geral?: string | null
+          email_parcerias?: string | null
+          endereco?: string | null
+          id?: string
+          linkedin_url?: string | null
+          telefone?: string | null
+          updated_at?: string
         }
         Relationships: []
       }
@@ -161,6 +221,36 @@ export type Database = {
         }
         Relationships: []
       }
+      estatisticas: {
+        Row: {
+          id: string
+          parcerias_ativas: number | null
+          solucoes_ativas: number | null
+          total_horas_poupadas: number | null
+          total_solucoes: number | null
+          total_utilizadores_impactados: number | null
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          parcerias_ativas?: number | null
+          solucoes_ativas?: number | null
+          total_horas_poupadas?: number | null
+          total_solucoes?: number | null
+          total_utilizadores_impactados?: number | null
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          parcerias_ativas?: number | null
+          solucoes_ativas?: number | null
+          total_horas_poupadas?: number | null
+          total_solucoes?: number | null
+          total_utilizadores_impactados?: number | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       resources: {
         Row: {
           content: string | null
@@ -188,6 +278,93 @@ export type Database = {
         }
         Relationships: []
       }
+      solucoes: {
+        Row: {
+          business_area_impact: string[] | null
+          created_at: string
+          description: string
+          human_impact: string | null
+          icon_url: string | null
+          id: string
+          images_urls: string[] | null
+          problem_solution: string | null
+          sdg_goals: number[] | null
+          status: Database["public"]["Enums"]["solution_status"]
+          subtitle: string
+          sustainability_impact: string | null
+          times_saved: number | null
+          title: string
+          updated_at: string
+          users_impacted: number | null
+        }
+        Insert: {
+          business_area_impact?: string[] | null
+          created_at?: string
+          description: string
+          human_impact?: string | null
+          icon_url?: string | null
+          id?: string
+          images_urls?: string[] | null
+          problem_solution?: string | null
+          sdg_goals?: number[] | null
+          status?: Database["public"]["Enums"]["solution_status"]
+          subtitle: string
+          sustainability_impact?: string | null
+          times_saved?: number | null
+          title: string
+          updated_at?: string
+          users_impacted?: number | null
+        }
+        Update: {
+          business_area_impact?: string[] | null
+          created_at?: string
+          description?: string
+          human_impact?: string | null
+          icon_url?: string | null
+          id?: string
+          images_urls?: string[] | null
+          problem_solution?: string | null
+          sdg_goals?: number[] | null
+          status?: Database["public"]["Enums"]["solution_status"]
+          subtitle?: string
+          sustainability_impact?: string | null
+          times_saved?: number | null
+          title?: string
+          updated_at?: string
+          users_impacted?: number | null
+        }
+        Relationships: []
+      }
+      valores_empresa: {
+        Row: {
+          fundacao_ano: number | null
+          historia: string | null
+          id: string
+          missao: string | null
+          updated_at: string
+          valores: string[] | null
+          visao: string | null
+        }
+        Insert: {
+          fundacao_ano?: number | null
+          historia?: string | null
+          id?: string
+          missao?: string | null
+          updated_at?: string
+          valores?: string[] | null
+          visao?: string | null
+        }
+        Update: {
+          fundacao_ano?: number | null
+          historia?: string | null
+          id?: string
+          missao?: string | null
+          updated_at?: string
+          valores?: string[] | null
+          visao?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -203,7 +380,13 @@ export type Database = {
       }
     }
     Enums: {
-      [_ in never]: never
+      solution_status:
+        | "live"
+        | "parceria"
+        | "prototipo"
+        | "teste-usuarios"
+        | "conceito"
+        | "teste-convite"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -330,6 +513,15 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      solution_status: [
+        "live",
+        "parceria",
+        "prototipo",
+        "teste-usuarios",
+        "conceito",
+        "teste-convite",
+      ],
+    },
   },
 } as const
