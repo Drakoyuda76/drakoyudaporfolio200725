@@ -63,6 +63,7 @@ const SolutionDetail = () => {
           sdgGoals: data.sdg_goals || [],
           timesSaved: data.times_saved || 0,
           usersImpacted: data.users_impacted || 0,
+          
           images: imageUrls.map((url, index) => ({
             id: `${index + 1}`,
             title: `Imagem ${index + 1}`,

@@ -35,9 +35,17 @@ const SolutionCard: React.FC<SolutionCardProps> = ({ solution, index }) => {
     try {
       setLoading(true);
       
-      // Load icon from solution data (assuming we have iconUrl in solution)
-      if ((solution as any).icon_url) {
-        setIconUrl((solution as any).icon_url);
+      // Load solution with icon from database
+      const { data: solutionData, error: solutionError } = await supabase
+        .from('solucoes')
+        .select('icon_url')
+        .eq('id', solution.id)
+        .single();
+
+      if (solutionError) {
+        console.error('Error loading solution data:', solutionError);
+      } else if (solutionData?.icon_url) {
+        setIconUrl(solutionData.icon_url);
       }
       
       // Load demonstration images from solucao_imagens table

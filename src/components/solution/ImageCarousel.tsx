@@ -42,32 +42,13 @@ const ImageCarousel = ({ images, solutionTitle }: ImageCarouselProps) => {
       {/* Main Display */}
       <Card className="relative overflow-hidden border-border/40 bg-card/50">
         <CardContent className="p-0">
-          <div className="relative h-80 bg-gradient-to-br from-gray-600 to-gray-800 flex items-center justify-center overflow-hidden">
+          <div className="relative h-80 overflow-hidden">
             {/* Actual Image Display */}
             <img 
               src={currentImage} 
               alt={`${solutionTitle} - Imagem ${currentIndex + 1}`}
               className="w-full h-full object-cover"
-              onError={(e) => {
-                // Fallback to placeholder if image fails to load
-                e.currentTarget.style.display = 'none';
-              }}
             />
-            
-            {/* Fallback Content */}
-            <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-gray-600 to-gray-800">
-              <div className="text-center space-y-4 p-8">
-                <div className="w-16 h-16 mx-auto bg-white/20 rounded-xl flex items-center justify-center">
-                  <Play className="h-8 w-8 text-white" />
-                </div>
-                <h3 className="text-xl font-tomorrow font-semibold text-white">
-                  {solutionTitle}
-                </h3>
-                <p className="text-white/80 text-sm max-w-xs">
-                  Demonstração da solução
-                </p>
-              </div>
-            </div>
 
             {/* Navigation Arrows */}
             {images.length > 1 && (
