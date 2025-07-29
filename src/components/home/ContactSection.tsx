@@ -1,9 +1,42 @@
+import { useState, useEffect } from 'react';
 import { Mail, MessageCircle, ArrowRight, ExternalLink } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { supabase } from '@/integrations/supabase/client';
 
 const ContactSection = () => {
+  const [contactInfo, setContactInfo] = useState({
+    email_geral: 'drakoyuda76@gmail.com',
+    email_parcerias: 'drakoyuda76@gmail.com'
+  });
+
+  useEffect(() => {
+    loadContactInfo();
+  }, []);
+
+  const loadContactInfo = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('empresa_contactos')
+        .select('*')
+        .single();
+
+      if (error) {
+        console.error('Error loading contact info:', error);
+        return;
+      }
+
+      if (data) {
+        setContactInfo({
+          email_geral: data.email_geral || 'drakoyuda76@gmail.com',
+          email_parcerias: data.email_parcerias || 'drakoyuda76@gmail.com'
+        });
+      }
+    } catch (error) {
+      console.error('Error loading contact info:', error);
+    }
+  };
   return (
     <section className="py-20 bg-gradient-to-br from-accent/5 via-background to-accent/5">
       <div className="container">
@@ -33,7 +66,7 @@ const ContactSection = () => {
               <CardContent className="space-y-4">
                 <div className="p-4 bg-background/50 rounded-lg border border-accent/20">
                   <p className="text-sm text-foreground">
-                    <strong>Email:</strong> drakoyuda76@gmail.com
+                    <strong>Email:</strong> {contactInfo.email_geral}
                   </p>
                   <p className="text-xs text-muted-foreground mt-2">
                     Resposta típica em 24 horas
@@ -68,7 +101,7 @@ const ContactSection = () => {
                       
                       <div className="p-4 bg-card rounded-lg border border-border/40">
                         <p className="text-sm text-foreground">
-                          <strong>Email:</strong> drakoyuda76@gmail.com
+                          <strong>Email:</strong> {contactInfo.email_geral}
                         </p>
                         <p className="text-xs text-muted-foreground mt-1">
                           Por favor, inclua informações sobre o seu projeto ou necessidades específicas.
@@ -76,7 +109,7 @@ const ContactSection = () => {
                       </div>
                       
                       <Button asChild className="w-full">
-                        <a href="mailto:drakoyuda76@gmail.com?subject=Interesse em Soluções de IA - DrakoYuda">
+                        <a href={`mailto:${contactInfo.email_geral}?subject=Interesse em Soluções de IA - DrakoYuda`}>
                           <ExternalLink className="mr-2 h-4 w-4" />
                           Abrir Cliente de Email
                         </a>

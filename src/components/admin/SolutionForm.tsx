@@ -20,6 +20,8 @@ const SolutionForm: React.FC<SolutionFormProps> = ({ solution, onSave, onCancel 
   const [loading, setLoading] = useState(false);
   const [iconFile, setIconFile] = useState<File | null>(null);
   const [imageFiles, setImageFiles] = useState<File[]>([]);
+  const [existingImages, setExistingImages] = useState<string[]>([]);
+  const [imagesToDelete, setImagesToDelete] = useState<string[]>([]);
   const [formData, setFormData] = useState({
     title: '',
     subtitle: '',
@@ -69,8 +71,32 @@ const SolutionForm: React.FC<SolutionFormProps> = ({ solution, onSave, onCancel 
         users_impacted: solution.users_impacted || 0,
         icon_url: solution.icon_url || ''
       });
+      
+      // Load existing images for this solution
+      loadExistingImages(solution.id);
     }
   }, [solution]);
+
+  const loadExistingImages = async (solutionId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('solucao_imagens')
+        .select('imagem_url')
+        .eq('solucao_id', solutionId)
+        .order('created_at', { ascending: true });
+
+      if (error) {
+        console.error('Error loading existing images:', error);
+        return;
+      }
+
+      if (data) {
+        setExistingImages(data.map(img => img.imagem_url));
+      }
+    } catch (error) {
+      console.error('Error loading existing images:', error);
+    }
+  };
 
   // Convert file to webp format and upload
   const uploadFile = async (file: File, path: string): Promise<string> => {
@@ -144,8 +170,9 @@ const SolutionForm: React.FC<SolutionFormProps> = ({ solution, onSave, onCancel 
     setLoading(true);
 
     try {
-      // Validate minimum images
-      if (!solution && imageFiles.length < 3) {
+      // Validate minimum images for new solutions
+      const totalImages = (existingImages.length - imagesToDelete.length) + imageFiles.length;
+      if (!solution && totalImages < 3) {
         toast({
           title: "Mínimo 3 imagens",
           description: "Por favor, selecione pelo menos 3 imagens de demonstração.",
@@ -192,17 +219,17 @@ const SolutionForm: React.FC<SolutionFormProps> = ({ solution, onSave, onCancel 
         solutionId = data.id;
       }
 
-      // Upload and save demonstration images
-      if (imageFiles.length > 0 && solutionId) {
-        // Delete existing images for this solution if updating
-        if (solution) {
-          await supabase
-            .from('solucao_imagens')
-            .delete()
-            .eq('solucao_id', solutionId);
-        }
+      // Handle image deletions
+      if (imagesToDelete.length > 0 && solutionId) {
+        await supabase
+          .from('solucao_imagens')
+          .delete()
+          .eq('solucao_id', solutionId)
+          .in('imagem_url', imagesToDelete);
+      }
 
-        // Upload new images
+      // Upload new demonstration images
+      if (imageFiles.length > 0 && solutionId) {
         const uploadPromises = imageFiles.map(async (file, index) => {
           const imagePath = `demo-images/${solutionId}/${Date.now()}_${index}_${file.name}`;
           const imageUrl = await uploadFile(file, imagePath);
@@ -352,15 +379,50 @@ const SolutionForm: React.FC<SolutionFormProps> = ({ solution, onSave, onCancel 
           </div>
 
           {/* Imagens de Demonstração */}
-          <div className="space-y-2">
+          <div className="space-y-4">
             <Label htmlFor="images">Imagens de Demonstração (Mínimo 3 imagens)</Label>
+            
+            {/* Existing Images */}
+            {existingImages.length > 0 && (
+              <div className="space-y-2">
+                <h4 className="text-sm font-medium">Imagens Atuais</h4>
+                <div className="grid grid-cols-3 gap-2">
+                  {existingImages.map((imageUrl, index) => (
+                    !imagesToDelete.includes(imageUrl) && (
+                      <div key={index} className="relative group">
+                        <div className="aspect-square rounded border overflow-hidden">
+                          <img 
+                            src={imageUrl} 
+                            alt={`Imagem atual ${index + 1}`} 
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                        <Button
+                          type="button"
+                          size="icon"
+                          variant="destructive"
+                          className="absolute -top-2 -right-2 w-6 h-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                          onClick={() => {
+                            setImagesToDelete(prev => [...prev, imageUrl]);
+                          }}
+                        >
+                          <X className="w-3 h-3" />
+                        </Button>
+                      </div>
+                    )
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Upload New Images */}
             <div className="border-2 border-dashed border-border rounded-lg p-6">
               <div className="text-center">
                 <Upload className="mx-auto h-12 w-12 text-muted-foreground" />
                 <div className="mt-4">
                   <Label htmlFor="images" className="cursor-pointer">
                     <span className="mt-2 block text-sm font-medium text-foreground">
-                      Carregar imagens de demonstração
+                      {existingImages.length > 0 ? 'Adicionar mais imagens' : 'Carregar imagens de demonstração'}
                     </span>
                     <span className="mt-1 block text-xs text-muted-foreground">
                       PNG, JPG, WEBP até 10MB cada
@@ -374,26 +436,17 @@ const SolutionForm: React.FC<SolutionFormProps> = ({ solution, onSave, onCancel 
                     className="hidden"
                     onChange={(e) => {
                       const files = Array.from(e.target.files || []);
-                      if (files.length < 3) {
-                        toast({
-                          title: "Mínimo 3 imagens",
-                          description: "Por favor, selecione pelo menos 3 imagens de demonstração.",
-                          variant: "destructive",
-                        });
-                        return;
-                      }
-                      setImageFiles(files);
+                      setImageFiles(prev => [...prev, ...files]);
                     }}
                   />
                 </div>
               </div>
             </div>
             
+            {/* New Images to Upload */}
             {imageFiles.length > 0 && (
               <div className="space-y-2">
-                <p className="text-sm text-muted-foreground">
-                  {imageFiles.length} imagens selecionadas para upload
-                </p>
+                <h4 className="text-sm font-medium">Novas imagens para upload ({imageFiles.length})</h4>
                 <div className="grid grid-cols-3 gap-2">
                   {imageFiles.map((file, index) => (
                     <div key={index} className="relative group">
@@ -422,11 +475,15 @@ const SolutionForm: React.FC<SolutionFormProps> = ({ solution, onSave, onCancel 
               </div>
             )}
 
-            {!imageFiles.length && !solution && (
-              <p className="text-sm text-muted-foreground">
-                Nenhuma imagem selecionada - será exibido "Sem imagens de demonstração" no frontend
-              </p>
-            )}
+            {/* Summary */}
+            <div className="text-sm text-muted-foreground">
+              Total de imagens: {(existingImages.length - imagesToDelete.length) + imageFiles.length}
+              {(existingImages.length - imagesToDelete.length) + imageFiles.length < 3 && (
+                <span className="text-destructive ml-2">
+                  (Mínimo: 3 imagens)
+                </span>
+              )}
+            </div>
           </div>
 
           {/* Áreas de Negócio */}

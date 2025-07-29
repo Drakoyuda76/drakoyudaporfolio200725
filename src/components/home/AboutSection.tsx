@@ -1,8 +1,49 @@
+import { useState, useEffect } from 'react';
 import { Heart, Lightbulb, Users, Target, Globe, Zap } from 'lucide-react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { supabase } from '@/integrations/supabase/client';
 import teamCollaboration from '@/assets/team-collaboration.jpg';
 
 const AboutSection = () => {
+  const [companyInfo, setCompanyInfo] = useState({
+    nome: 'Drakoyuda',
+    descricao: 'Transformamos negócios através de soluções tecnológicas inovadoras, criando um impacto positivo na sociedade angolana.',
+    missao: 'Democratizar o acesso à tecnologia e criar soluções que impactem positivamente a vida das pessoas e organizações em Angola.',
+    visao: 'Ser a empresa de tecnologia líder em Angola, reconhecida pela inovação e impacto social.',
+    historia: 'Fundada com o propósito de transformar a realidade tecnológica de Angola, a Drakoyuda nasceu da visão de criar soluções que realmente fazem a diferença.',
+    fundacao_ano: 2020
+  });
+
+  useEffect(() => {
+    loadCompanyInfo();
+  }, []);
+
+  const loadCompanyInfo = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('empresa_info')
+        .select('*')
+        .single();
+
+      if (error) {
+        console.error('Error loading company info:', error);
+        return;
+      }
+
+      if (data) {
+        setCompanyInfo({
+          nome: data.nome || 'Drakoyuda',
+          descricao: data.descricao || 'Transformamos negócios através de soluções tecnológicas inovadoras, criando um impacto positivo na sociedade angolana.',
+          missao: data.missao || 'Democratizar o acesso à tecnologia e criar soluções que impactem positivamente a vida das pessoas e organizações em Angola.',
+          visao: data.visao || 'Ser a empresa de tecnologia líder em Angola, reconhecida pela inovação e impacto social.',
+          historia: data.historia || 'Fundada com o propósito de transformar a realidade tecnológica de Angola, a Drakoyuda nasceu da visão de criar soluções que realmente fazem a diferença.',
+          fundacao_ano: data.fundacao_ano || 2020
+        });
+      }
+    } catch (error) {
+      console.error('Error loading company info:', error);
+    }
+  };
   const values = [
     {
       icon: Heart,
@@ -44,12 +85,10 @@ const AboutSection = () => {
           <div className="space-y-8">
             <div className="space-y-4">
               <h2 className="font-tomorrow font-semibold text-3xl md:text-4xl text-foreground">
-                Sobre a DrakoYuda
+                Sobre a {companyInfo.nome}
               </h2>
               <p className="text-lg text-muted-foreground leading-relaxed">
-                Somos uma empresa angolana especializada em desenvolvimento de micro soluções de 
-                Inteligência Artificial. A nossa missão é democratizar o acesso à tecnologia de IA, 
-                criando ferramentas que ressoam com a realidade cultural e económica de Angola.
+                {companyInfo.descricao}
               </p>
             </div>
 
@@ -72,7 +111,7 @@ const AboutSection = () => {
 
                 <div className="grid sm:grid-cols-2 gap-4">
                   <div className="text-center p-4 bg-card/50 rounded-lg border border-border/40">
-                    <div className="text-2xl font-tomorrow font-semibold text-accent">2024</div>
+                    <div className="text-2xl font-tomorrow font-semibold text-accent">{companyInfo.fundacao_ano}</div>
                     <p className="text-sm text-muted-foreground">Ano de Fundação</p>
                   </div>
                   <div className="text-center p-4 bg-card/50 rounded-lg border border-border/40">
@@ -101,8 +140,7 @@ const AboutSection = () => {
 
             <div className="text-center p-4 bg-gradient-impact rounded-lg border border-accent/10">
               <p className="text-sm text-muted-foreground italic">
-                "A nossa visão é que cada angolano tenha acesso a ferramentas de IA que 
-                simplificam a vida e potenciam o desenvolvimento pessoal e comunitário."
+                "{companyInfo.visao}"
               </p>
             </div>
           </div>
