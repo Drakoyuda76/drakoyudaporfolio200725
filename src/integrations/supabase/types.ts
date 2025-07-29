@@ -221,6 +221,69 @@ export type Database = {
         }
         Relationships: []
       }
+      empresa_contactos: {
+        Row: {
+          email_geral: string | null
+          email_parcerias: string | null
+          endereco: string | null
+          id: string
+          linkedin_url: string | null
+          telefone: string | null
+          updated_at: string
+        }
+        Insert: {
+          email_geral?: string | null
+          email_parcerias?: string | null
+          endereco?: string | null
+          id?: string
+          linkedin_url?: string | null
+          telefone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          email_geral?: string | null
+          email_parcerias?: string | null
+          endereco?: string | null
+          id?: string
+          linkedin_url?: string | null
+          telefone?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      empresa_info: {
+        Row: {
+          descricao: string | null
+          fundacao_ano: number | null
+          historia: string | null
+          id: string
+          missao: string | null
+          nome: string | null
+          updated_at: string
+          visao: string | null
+        }
+        Insert: {
+          descricao?: string | null
+          fundacao_ano?: number | null
+          historia?: string | null
+          id?: string
+          missao?: string | null
+          nome?: string | null
+          updated_at?: string
+          visao?: string | null
+        }
+        Update: {
+          descricao?: string | null
+          fundacao_ano?: number | null
+          historia?: string | null
+          id?: string
+          missao?: string | null
+          nome?: string | null
+          updated_at?: string
+          visao?: string | null
+        }
+        Relationships: []
+      }
       estatisticas: {
         Row: {
           id: string
@@ -277,6 +340,35 @@ export type Database = {
           type?: string
         }
         Relationships: []
+      }
+      solucao_imagens: {
+        Row: {
+          created_at: string
+          id: string
+          imagem_url: string
+          solucao_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          imagem_url: string
+          solucao_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          imagem_url?: string
+          solucao_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "solucao_imagens_solucao_id_fkey"
+            columns: ["solucao_id"]
+            isOneToOne: false
+            referencedRelation: "solucoes"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       solucoes: {
         Row: {

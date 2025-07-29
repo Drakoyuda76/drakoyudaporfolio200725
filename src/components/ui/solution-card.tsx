@@ -13,9 +13,10 @@ interface SolutionCardProps {
 }
 
 const SolutionCard: React.FC<SolutionCardProps> = ({ solution, index }) => {
-  const [iconUrl, setIconUrl] = useState<string | null>(null);
+  const [iconUrl, setIconUrl] = useState<string>('');
   const [images, setImages] = useState<string[]>([]);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     loadSolutionAssets();
@@ -32,21 +33,29 @@ const SolutionCard: React.FC<SolutionCardProps> = ({ solution, index }) => {
 
   const loadSolutionAssets = async () => {
     try {
-      // Load icon URL
-      if (solution.images && solution.images.length > 0) {
-        const iconImage = solution.images[0];
-        if (iconImage && typeof iconImage === 'string') {
-          setIconUrl(iconImage);
-        }
+      setLoading(true);
+      
+      // Load icon from solution data (assuming we have iconUrl in solution)
+      if ((solution as any).icon_url) {
+        setIconUrl((solution as any).icon_url);
       }
+      
+      // Load demonstration images from solucao_imagens table
+      const { data: imagesData, error } = await supabase
+        .from('solucao_imagens')
+        .select('imagem_url')
+        .eq('solucao_id', solution.id)
+        .order('created_at', { ascending: true });
 
-      // Load images from images array
-      if (solution.images && solution.images.length > 0) {
-        const imageUrls = solution.images.filter(img => typeof img === 'string') as string[];
-        setImages(imageUrls);
+      if (error) {
+        console.error('Error loading solution images:', error);
+      } else if (imagesData && imagesData.length > 0) {
+        setImages(imagesData.map(img => img.imagem_url));
       }
     } catch (error) {
       console.error('Error loading solution assets:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
