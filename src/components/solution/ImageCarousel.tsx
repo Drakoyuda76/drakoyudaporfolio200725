@@ -29,7 +29,10 @@ const ImageCarousel = ({ images, solutionTitle }: ImageCarouselProps) => {
   if (!images || images.length === 0) {
     return (
       <div className="text-center py-8">
-        <p className="text-muted-foreground">Nenhuma imagem disponível</p>
+        <p className="text-muted-foreground">Sem imagens de demonstração</p>
+        <p className="text-xs text-muted-foreground mt-2">
+          As imagens de demonstração devem ser adicionadas pelo administrador
+        </p>
       </div>
     );
   }

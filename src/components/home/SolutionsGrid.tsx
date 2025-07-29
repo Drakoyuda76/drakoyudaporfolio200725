@@ -26,27 +26,39 @@ const SolutionsGrid = () => {
 
       if (error) throw error;
 
-      const formattedSolutions: Solution[] = (data || []).map(solucao => ({
-        id: solucao.id,
-        title: solucao.title,
-        subtitle: solucao.subtitle,
-        description: solucao.description,
-        status: solucao.status as SolutionStatus,
-        businessAreaImpact: solucao.business_area_impact as BusinessArea[],
-        problemSolution: solucao.problem_solution || '',
-        humanImpact: solucao.human_impact || '',
-        sustainabilityImpact: solucao.sustainability_impact || '',
-        sdgGoals: solucao.sdg_goals || [],
-        timesSaved: solucao.times_saved || 0,
-        usersImpacted: solucao.users_impacted || 0,
-        images: (solucao.images_urls || []).map((url, index) => ({
-          id: `${index + 1}`,
-          title: `Imagem ${index + 1}`,
-          description: `Demonstração da ${solucao.title}`,
-          colorScheme: `from-blue-${500 + index * 100} to-blue-${600 + index * 100}`
-        })),
-        createdAt: new Date(solucao.created_at),
-        updatedAt: new Date(solucao.updated_at)
+      // Load solutions and their associated images
+      const formattedSolutions: Solution[] = await Promise.all((data || []).map(async (solucao) => {
+        // Load demonstration images for this solution
+        const { data: imagesData } = await supabase
+          .from('solucao_imagens')
+          .select('imagem_url')
+          .eq('solucao_id', solucao.id)
+          .order('created_at', { ascending: true });
+
+        const imageUrls = imagesData?.map(img => img.imagem_url) || [];
+
+        return {
+          id: solucao.id,
+          title: solucao.title,
+          subtitle: solucao.subtitle,
+          description: solucao.description,
+          status: solucao.status as SolutionStatus,
+          businessAreaImpact: solucao.business_area_impact as BusinessArea[],
+          problemSolution: solucao.problem_solution || '',
+          humanImpact: solucao.human_impact || '',
+          sustainabilityImpact: solucao.sustainability_impact || '',
+          sdgGoals: solucao.sdg_goals || [],
+          timesSaved: solucao.times_saved || 0,
+          usersImpacted: solucao.users_impacted || 0,
+          images: imageUrls.map((url, index) => ({
+            id: `${index + 1}`,
+            title: `Imagem ${index + 1}`,
+            description: `Demonstração da ${solucao.title}`,
+            colorScheme: `from-blue-${500 + index * 100} to-blue-${600 + index * 100}`
+          })),
+          createdAt: new Date(solucao.created_at),
+          updatedAt: new Date(solucao.updated_at)
+        };
       }));
 
       setSolutions(formattedSolutions);

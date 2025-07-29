@@ -1,359 +1,225 @@
-
 import { useState, useEffect } from 'react';
-import { Plus, Edit, Trash2, Upload, FileText, Save, X, Download, RefreshCw } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Badge } from '@/components/ui/badge';
-import { useNavigate } from 'react-router-dom';
-import { getSolutions, getStatusLabel, getStatusColor, updateSolutions } from '@/data/solutions';
-import { saveSolutions, loadSolutions, exportSolutionsAsJSON, clearStorageData } from '@/utils/storage';
-import AdminPanelHeader from './AdminPanelHeader';
-import SolutionRowItem from './SolutionRowItem';
-import type { Solution, SolutionStatus, BusinessArea } from '@/types/solution';
+import { Button } from '@/components/ui/button';
+import { Loader2, Settings, Users, Building2, BarChart3, FileText, Plus } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/hooks/use-toast';
+import SolutionForm from './SolutionForm';
+import CompanyInfoForm from './CompanyInfoForm';
+import ContactInfoForm from './ContactInfoForm';
+import StatisticsForm from './StatisticsForm';
 
 const AdminPanel = () => {
-  const navigate = useNavigate();
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [showAddForm, setShowAddForm] = useState(false);
-  const [localSolutions, setLocalSolutions] = useState<Solution[]>(() => getSolutions());
+  const [solutions, setSolutions] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [editingSolution, setEditingSolution] = useState<any>(null);
+  const [showSolutionForm, setShowSolutionForm] = useState(false);
 
-  const businessAreas: BusinessArea[] = ['front-office', 'back-office', 'core-capabilities', 'products-services'];
-  const statuses: SolutionStatus[] = ['conceito', 'prototipo', 'teste-usuarios', 'teste-convite', 'parceria', 'live'];
+  useEffect(() => {
+    loadSolutions();
+  }, []);
 
-  const [formData, setFormData] = useState<Partial<Solution>>({
-    title: '',
-    subtitle: '',
-    description: '',
-    status: 'conceito',
-    businessAreaImpact: [],
-    problemSolution: '',
-    humanImpact: '',
-    sustainabilityImpact: '',
-    sdgGoals: [],
-    timesSaved: 0,
-    usersImpacted: 0,
-    images: []
-  });
+  const loadSolutions = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('solucoes')
+        .select('*')
+        .order('created_at', { ascending: false });
 
-  const resetForm = () => {
-    setFormData({
-      title: '',
-      subtitle: '',
-      description: '',
-      status: 'conceito',
-      businessAreaImpact: [],
-      problemSolution: '',
-      humanImpact: '',
-      sustainabilityImpact: '',
-      sdgGoals: [],
-      timesSaved: 0,
-      usersImpacted: 0,
-      images: []
-    });
-  };
-
-  const handleEdit = (solution: Solution) => {
-    setFormData(solution);
-    setEditingId(solution.id);
-    setShowAddForm(true);
-  };
-
-  const handleDelete = (id: string) => {
-    if (confirm('Tem certeza que deseja excluir esta solução?')) {
-      const updatedSolutions = localSolutions.filter(s => s.id !== id);
-      setLocalSolutions(updatedSolutions);
-      updateSolutions(updatedSolutions);
-      saveSolutions(updatedSolutions);
+      if (error) throw error;
+      setSolutions(data || []);
+    } catch (error) {
+      console.error('Erro ao carregar soluções:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao carregar soluções. Tente novamente.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleSave = () => {
-    if (!formData.title || !formData.subtitle) {
-      alert('Por favor, preencha pelo menos o título e subtítulo.');
-      return;
-    }
-
-    const newSolution: Solution = {
-      ...formData,
-      id: editingId || formData.title!.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
-      createdAt: editingId ? localSolutions.find(s => s.id === editingId)?.createdAt || new Date() : new Date(),
-      updatedAt: new Date(),
-    } as Solution;
-
-    let updatedSolutions: Solution[];
-    if (editingId) {
-      updatedSolutions = localSolutions.map(s => s.id === editingId ? newSolution : s);
-    } else {
-      updatedSolutions = [...localSolutions, newSolution];
-    }
-
-    setLocalSolutions(updatedSolutions);
-    updateSolutions(updatedSolutions);
-    saveSolutions(updatedSolutions);
-
-    setShowAddForm(false);
-    setEditingId(null);
-    resetForm();
+  const handleEditSolution = (solution: any) => {
+    setEditingSolution(solution);
+    setShowSolutionForm(true);
   };
 
-  const handleImportMD = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file && file.type === 'text/markdown') {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const content = e.target?.result as string;
-        setFormData(prev => ({
-          ...prev,
-          description: content
-        }));
-      };
-      reader.readAsText(file);
+  const handleDeleteSolution = async (id: string) => {
+    if (!confirm('Tem certeza que deseja excluir esta solução?')) return;
+    
+    try {
+      // Delete related images first
+      await supabase
+        .from('solucao_imagens')
+        .delete()
+        .eq('solucao_id', id);
+
+      // Delete solution
+      const { error } = await supabase
+        .from('solucoes')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Sucesso!",
+        description: "Solução excluída com sucesso.",
+      });
+
+      await loadSolutions();
+    } catch (error) {
+      console.error('Erro ao excluir solução:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao excluir solução. Tente novamente.",
+        variant: "destructive",
+      });
     }
   };
 
-  const toggleBusinessArea = (area: BusinessArea) => {
-    setFormData(prev => ({
-      ...prev,
-      businessAreaImpact: prev.businessAreaImpact?.includes(area)
-        ? prev.businessAreaImpact.filter(a => a !== area)
-        : [...(prev.businessAreaImpact || []), area]
-    }));
+  const handleSolutionSaved = async () => {
+    setShowSolutionForm(false);
+    setEditingSolution(null);
+    await loadSolutions();
   };
 
-  const handleExportData = () => {
-    const dataStr = exportSolutionsAsJSON(localSolutions);
-    const dataBlob = new Blob([dataStr], { type: 'application/json' });
-    const url = URL.createObjectURL(dataBlob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `drakoyuda-solutions-${new Date().toISOString().split('T')[0]}.json`;
-    link.click();
-    URL.revokeObjectURL(url);
-  };
-
-  const handleRefreshData = () => {
-    if (confirm('Isto irá recarregar os dados do localStorage. Continuar?')) {
-      const savedData = loadSolutions();
-      if (savedData) {
-        setLocalSolutions(savedData);
-      }
-    }
-  };
-
-  const validatePortfolioContent = () => {
-    const solutions = loadSolutions();
-    const issues: string[] = [];
-
-    if (!solutions || solutions.length === 0) {
-      issues.push('Nenhuma solução encontrada');
-      return issues;
-    }
-
-    solutions.forEach(solution => {
-      if (!solution.title) issues.push(`Solução ${solution.id}: Título em falta`);
-      if (!solution.description) issues.push(`Solução ${solution.id}: Descrição em falta`);
-      if (!solution.images || solution.images.length < 3) issues.push(`Solução ${solution.id}: Menos de 3 imagens`);
-      if (!solution.humanImpact) issues.push(`Solução ${solution.id}: Impacto humano em falta`);
-      if (!solution.sustainabilityImpact) issues.push(`Solução ${solution.id}: Impacto sustentabilidade em falta`);
-      if (!solution.problemSolution) issues.push(`Solução ${solution.id}: Problema & Solução em falta`);
-    });
-
-    return issues;
-  };
-
-  const runPortfolioValidation = () => {
-    const issues = validatePortfolioContent();
-    if (issues.length === 0) {
-      alert('✅ Portfólio pronto para demonstração!\n\n• 10 soluções completas\n• Todas as imagens configuradas\n• Conteúdo validado');
-    } else {
-      alert(`⚠️ Questões encontradas (${issues.length}):\n\n${issues.slice(0, 5).join('\n')}${issues.length > 5 ? '\n...' : ''}`);
-    }
-  };
-
-  const totalHoursSaved = localSolutions.reduce((sum, solution) => sum + solution.timesSaved, 0);
+  if (showSolutionForm) {
+    return (
+      <div className="min-h-screen bg-background">
+        <SolutionForm
+          solution={editingSolution}
+          onSave={handleSolutionSaved}
+          onCancel={() => {
+            setShowSolutionForm(false);
+            setEditingSolution(null);
+          }}
+        />
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <AdminPanelHeader
-        solutionsCount={localSolutions.length}
-        totalHoursSaved={totalHoursSaved}
-        onValidatePortfolio={runPortfolioValidation}
-        onExportData={handleExportData}
-        onNewSolution={() => {
-          setShowAddForm(true);
-          setEditingId(null);
-          resetForm();
-        }}
-      />
+    <div className="min-h-screen bg-background">
+      <div className="container mx-auto px-6 py-8">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-foreground mb-2">Painel Administrativo</h1>
+          <p className="text-muted-foreground">Gerir conteúdos e configurações do sistema</p>
+        </div>
 
-      <div className="max-w-7xl mx-auto px-6 py-8">
-        {/* Add/Edit Form */}
-        {showAddForm && (
-          <Card className="mb-8">
-            <CardHeader>
-              <CardTitle>
-                {editingId ? 'Editar Solução' : 'Adicionar Nova Solução'}
-              </CardTitle>
-              <CardDescription>
-                Preencha os dados da solução de IA
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="title">Título *</Label>
-                  <Input
-                    id="title"
-                    value={formData.title || ''}
-                    onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-                    placeholder="Ex: Assistente Financeiro Pessoal"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="subtitle">Subtítulo *</Label>
-                  <Input
-                    id="subtitle"
-                    value={formData.subtitle || ''}
-                    onChange={(e) => setFormData(prev => ({ ...prev, subtitle: e.target.value }))}
-                    placeholder="Ex: IA para Gestão Financeira Inteligente"
-                  />
-                </div>
-              </div>
+        <Tabs defaultValue="solutions" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="solutions" className="flex items-center gap-2">
+              <FileText className="w-4 h-4" />
+              Soluções
+            </TabsTrigger>
+            <TabsTrigger value="company" className="flex items-center gap-2">
+              <Building2 className="w-4 h-4" />
+              Empresa
+            </TabsTrigger>
+            <TabsTrigger value="contacts" className="flex items-center gap-2">
+              <Users className="w-4 h-4" />
+              Contactos
+            </TabsTrigger>
+            <TabsTrigger value="statistics" className="flex items-center gap-2">
+              <BarChart3 className="w-4 h-4" />
+              Estatísticas
+            </TabsTrigger>
+          </TabsList>
 
-              <div className="grid md:grid-cols-2 gap-4">
+          <TabsContent value="solutions" className="space-y-6">
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between">
                 <div>
-                  <Label htmlFor="status">Status</Label>
-                  <Select 
-                    value={formData.status} 
-                    onValueChange={(value) => setFormData(prev => ({ ...prev, status: value as SolutionStatus }))}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {statuses.map(status => (
-                        <SelectItem key={status} value={status}>
-                          {getStatusLabel(status)}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                  <CardTitle>Gestão de Soluções</CardTitle>
+                  <CardDescription>
+                    Adicionar, editar e remover soluções do portfólio
+                  </CardDescription>
                 </div>
-                <div>
-                  <Label>Áreas de Negócio</Label>
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    {businessAreas.map(area => (
-                      <Badge
-                        key={area}
-                        variant={formData.businessAreaImpact?.includes(area) ? "default" : "outline"}
-                        className="cursor-pointer"
-                        onClick={() => toggleBusinessArea(area)}
+                <Button 
+                  onClick={() => {
+                    setEditingSolution(null);
+                    setShowSolutionForm(true);
+                  }}
+                  className="flex items-center gap-2"
+                >
+                  <Plus className="w-4 h-4" />
+                  Nova Solução
+                </Button>
+              </CardHeader>
+              <CardContent>
+                {loading ? (
+                  <div className="flex justify-center items-center py-12">
+                    <Loader2 className="h-8 w-8 animate-spin" />
+                    <span className="ml-2">A carregar soluções...</span>
+                  </div>
+                ) : solutions.length === 0 ? (
+                  <div className="text-center py-12">
+                    <p className="text-muted-foreground mb-4">Nenhuma solução encontrada.</p>
+                    <Button 
+                      onClick={() => {
+                        setEditingSolution(null);
+                        setShowSolutionForm(true);
+                      }}
+                    >
+                      Criar primeira solução
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {solutions.map((solution) => (
+                      <div 
+                        key={solution.id} 
+                        className="flex items-center justify-between p-4 border rounded-lg"
                       >
-                        {area.replace('-', ' ')}
-                      </Badge>
+                        <div className="flex-1">
+                          <h3 className="font-semibold">{solution.title}</h3>
+                          <p className="text-sm text-muted-foreground">{solution.subtitle}</p>
+                          <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
+                            <span>Status: {solution.status}</span>
+                            <span>Horas poupadas: {solution.times_saved || 0}</span>
+                            <span>Utilizadores: {solution.users_impacted || 0}</span>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleEditSolution(solution)}
+                          >
+                            Editar
+                          </Button>
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={() => handleDeleteSolution(solution.id)}
+                          >
+                            Excluir
+                          </Button>
+                        </div>
+                      </div>
                     ))}
                   </div>
-                </div>
-              </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
 
-              <div>
-                <Label htmlFor="description">Descrição</Label>
-                <Textarea
-                  id="description"
-                  value={formData.description || ''}
-                  onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                  placeholder="Descrição da solução..."
-                  rows={3}
-                />
-              </div>
+          <TabsContent value="company">
+            <CompanyInfoForm />
+          </TabsContent>
 
-              <div>
-                <Label htmlFor="problemSolution">Problema & Solução</Label>
-                <Textarea
-                  id="problemSolution"
-                  value={formData.problemSolution || ''}
-                  onChange={(e) => setFormData(prev => ({ ...prev, problemSolution: e.target.value }))}
-                  placeholder="Descrição do problema e como a solução resolve..."
-                  rows={3}
-                />
-              </div>
+          <TabsContent value="contacts">
+            <ContactInfoForm />
+          </TabsContent>
 
-              <div>
-                <Label htmlFor="humanImpact">Impacto Humano</Label>
-                <Textarea
-                  id="humanImpact"
-                  value={formData.humanImpact || ''}
-                  onChange={(e) => setFormData(prev => ({ ...prev, humanImpact: e.target.value }))}
-                  placeholder="Como a solução impacta positivamente as pessoas..."
-                  rows={3}
-                />
-              </div>
-
-              <div className="grid md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="timesSaved">Horas Poupadas</Label>
-                  <Input
-                    id="timesSaved"
-                    type="number"
-                    value={formData.timesSaved || 0}
-                    onChange={(e) => setFormData(prev => ({ ...prev, timesSaved: parseInt(e.target.value) || 0 }))}
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="usersImpacted">Utilizadores Impactados</Label>
-                  <Input
-                    id="usersImpacted"
-                    type="number"
-                    value={formData.usersImpacted || 0}
-                    onChange={(e) => setFormData(prev => ({ ...prev, usersImpacted: parseInt(e.target.value) || 0 }))}
-                  />
-                </div>
-              </div>
-
-              <div className="flex justify-end space-x-2">
-                <Button 
-                  variant="outline" 
-                  onClick={() => {
-                    setShowAddForm(false);
-                    setEditingId(null);
-                    resetForm();
-                  }}
-                >
-                  <X className="h-4 w-4 mr-2" />
-                  Cancelar
-                </Button>
-                <Button onClick={handleSave} className="bg-indigo-500 hover:bg-indigo-600">
-                  <Save className="h-4 w-4 mr-2" />
-                  Salvar
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        )}
-
-        {/* Solutions Management */}
-        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-          <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-700">
-            <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">
-              Gestão de Soluções
-            </h2>
-          </div>
-          
-          <div className="divide-y divide-gray-200 dark:divide-gray-700">
-            {localSolutions.map((solution) => (
-              <SolutionRowItem
-                key={solution.id}
-                solution={solution}
-                onEdit={handleEdit}
-                onDelete={handleDelete}
-              />
-            ))}
-          </div>
-        </div>
+          <TabsContent value="statistics">
+            <StatisticsForm />
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );

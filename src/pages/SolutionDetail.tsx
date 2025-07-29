@@ -26,6 +26,7 @@ const SolutionDetail = () => {
 
   const loadSolution = async () => {
     try {
+      // Load solution data
       const { data, error } = await supabase
         .from('solucoes')
         .select('*')
@@ -35,8 +36,18 @@ const SolutionDetail = () => {
       if (error) throw error;
 
       if (data) {
-        // Extract images URLs
-        const imageUrls = data.images_urls || [];
+        // Load demonstration images from solucao_imagens table
+        const { data: imagesData, error: imagesError } = await supabase
+          .from('solucao_imagens')
+          .select('imagem_url')
+          .eq('solucao_id', id)
+          .order('created_at', { ascending: true });
+
+        if (imagesError) {
+          console.error('Error loading images:', imagesError);
+        }
+
+        const imageUrls = imagesData?.map(img => img.imagem_url) || [];
         setImages(imageUrls);
 
         const formattedSolution: Solution = {
@@ -52,7 +63,7 @@ const SolutionDetail = () => {
           sdgGoals: data.sdg_goals || [],
           timesSaved: data.times_saved || 0,
           usersImpacted: data.users_impacted || 0,
-          images: (data.images_urls || []).map((url, index) => ({
+          images: imageUrls.map((url, index) => ({
             id: `${index + 1}`,
             title: `Imagem ${index + 1}`,
             description: `Demonstração da ${data.title}`,

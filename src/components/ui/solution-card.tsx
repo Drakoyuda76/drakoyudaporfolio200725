@@ -102,9 +102,9 @@ const SolutionCard: React.FC<SolutionCardProps> = ({ solution, index }) => {
             {iconUrl ? (
               <img src={iconUrl} alt={solution.title} className="w-full h-full object-cover" />
             ) : (
-              <span className="text-white text-xl">
-                {getSolutionIcon(solution.title)}
-              </span>
+              <div className="text-center">
+                <span className="text-white text-[8px] font-medium">Sem ícone</span>
+              </div>
             )}
           </div>
           
