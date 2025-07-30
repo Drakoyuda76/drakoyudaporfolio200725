@@ -2,13 +2,15 @@ import { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Loader2, Settings, Users, Building2, BarChart3, FileText, Plus } from 'lucide-react';
+import { Loader2, Settings, Users, Building2, BarChart3, FileText, Plus, Download, Upload } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import SolutionForm from './SolutionForm';
 import CompanyInfoForm from './CompanyInfoForm';
 import ContactInfoForm from './ContactInfoForm';
 import StatisticsForm from './StatisticsForm';
+import UserManagement from './UserManagement';
+import ImportExportButtons from './ImportExportButtons';
 
 const AdminPanel = () => {
   const [solutions, setSolutions] = useState<any[]>([]);
@@ -81,6 +83,78 @@ const AdminPanel = () => {
     }
   };
 
+  const exportSolutions = () => {
+    const exportData = solutions.map(solution => ({
+      title: solution.title,
+      subtitle: solution.subtitle,
+      description: solution.description,
+      problem_solution: solution.problem_solution,
+      business_area_impact: solution.business_area_impact,
+      sdg_goals: solution.sdg_goals,
+      times_saved: solution.times_saved,
+      users_impacted: solution.users_impacted,
+      status: solution.status,
+      sustainability_impact: solution.sustainability_impact,
+      human_impact: solution.human_impact,
+      // Exclude images and icon_url as they need manual management
+      icon_url: '',
+      images_urls: []
+    }));
+    
+    const dataStr = JSON.stringify(exportData, null, 2);
+    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+    
+    const exportFileDefaultName = `solucoes_${new Date().toISOString().split('T')[0]}.json`;
+    
+    const linkElement = document.createElement('a');
+    linkElement.setAttribute('href', dataUri);
+    linkElement.setAttribute('download', exportFileDefaultName);
+    linkElement.click();
+    
+    toast({
+      title: "Sucesso!",
+      description: "Soluções exportadas com sucesso.",
+    });
+  };
+
+  const importSolutions = async (data: any) => {
+    try {
+      if (!Array.isArray(data)) {
+        throw new Error('Formato de arquivo inválido. Esperado um array de soluções.');
+      }
+
+      for (const solutionData of data) {
+        await supabase
+          .from('solucoes')
+          .insert({
+            title: solutionData.title,
+            subtitle: solutionData.subtitle,
+            description: solutionData.description,
+            problem_solution: solutionData.problem_solution,
+            business_area_impact: solutionData.business_area_impact,
+            sdg_goals: solutionData.sdg_goals,
+            times_saved: solutionData.times_saved,
+            users_impacted: solutionData.users_impacted,
+            status: solutionData.status,
+            sustainability_impact: solutionData.sustainability_impact,
+            human_impact: solutionData.human_impact,
+            // Images and icons will be added manually
+            icon_url: '',
+            images_urls: []
+          });
+      }
+
+      toast({
+        title: "Sucesso!",
+        description: `${data.length} soluções importadas com sucesso.`,
+      });
+
+      await loadSolutions();
+    } catch (error) {
+      throw error;
+    }
+  };
+
   const handleSolutionSaved = async () => {
     setShowSolutionForm(false);
     setEditingSolution(null);
@@ -111,7 +185,7 @@ const AdminPanel = () => {
         </div>
 
         <Tabs defaultValue="solutions" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-4">
+          <TabsList className="grid w-full grid-cols-5">
             <TabsTrigger value="solutions" className="flex items-center gap-2">
               <FileText className="w-4 h-4" />
               Soluções
@@ -128,6 +202,10 @@ const AdminPanel = () => {
               <BarChart3 className="w-4 h-4" />
               Estatísticas
             </TabsTrigger>
+            <TabsTrigger value="users" className="flex items-center gap-2">
+              <Settings className="w-4 h-4" />
+              Usuários
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="solutions" className="space-y-6">
@@ -139,16 +217,23 @@ const AdminPanel = () => {
                     Adicionar, editar e remover soluções do portfólio
                   </CardDescription>
                 </div>
-                <Button 
-                  onClick={() => {
-                    setEditingSolution(null);
-                    setShowSolutionForm(true);
-                  }}
-                  className="flex items-center gap-2"
-                >
-                  <Plus className="w-4 h-4" />
-                  Nova Solução
-                </Button>
+                <div className="flex items-center gap-2">
+                  <ImportExportButtons
+                    onExport={exportSolutions}
+                    onImport={importSolutions}
+                    exportFilename="solucoes"
+                  />
+                  <Button 
+                    onClick={() => {
+                      setEditingSolution(null);
+                      setShowSolutionForm(true);
+                    }}
+                    className="flex items-center gap-2"
+                  >
+                    <Plus className="w-4 h-4" />
+                    Nova Solução
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent>
                 {loading ? (
@@ -218,6 +303,10 @@ const AdminPanel = () => {
 
           <TabsContent value="statistics">
             <StatisticsForm />
+          </TabsContent>
+
+          <TabsContent value="users">
+            <UserManagement />
           </TabsContent>
         </Tabs>
       </div>

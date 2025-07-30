@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -7,6 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
+import ImportExportButtons from './ImportExportButtons';
 
 interface CompanyInfo {
   id?: string;
@@ -97,6 +98,77 @@ const CompanyInfoForm = () => {
     }
   };
 
+  const exportData = () => {
+    const exportData = {
+      ...formData,
+      exported_at: new Date().toISOString()
+    };
+    
+    const dataStr = JSON.stringify(exportData, null, 2);
+    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+    
+    const exportFileDefaultName = `empresa_info_${new Date().toISOString().split('T')[0]}.json`;
+    
+    const linkElement = document.createElement('a');
+    linkElement.setAttribute('href', dataUri);
+    linkElement.setAttribute('download', exportFileDefaultName);
+    linkElement.click();
+    
+    toast({
+      title: "Sucesso!",
+      description: "Informações da empresa exportadas com sucesso.",
+    });
+  };
+
+  const importData = async (data: any) => {
+    try {
+      // Update form data
+      setFormData({
+        id: formData.id, // Keep existing ID
+        nome: data.nome || '',
+        descricao: data.descricao || '',
+        missao: data.missao || '',
+        visao: data.visao || '',
+        historia: data.historia || '',
+        fundacao_ano: data.fundacao_ano || new Date().getFullYear()
+      });
+
+      // Save to database
+      if (formData.id) {
+        const { error } = await supabase
+          .from('empresa_info')
+          .update({
+            nome: data.nome,
+            descricao: data.descricao,
+            missao: data.missao,
+            visao: data.visao,
+            historia: data.historia,
+            fundacao_ano: data.fundacao_ano
+          })
+          .eq('id', formData.id);
+
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from('empresa_info')
+          .insert({
+            nome: data.nome,
+            descricao: data.descricao,
+            missao: data.missao,
+            visao: data.visao,
+            historia: data.historia,
+            fundacao_ano: data.fundacao_ano
+          });
+
+        if (error) throw error;
+      }
+
+      await loadCompanyInfo();
+    } catch (error) {
+      throw error;
+    }
+  };
+
   if (initialLoad) {
     return (
       <Card>
@@ -111,8 +183,18 @@ const CompanyInfoForm = () => {
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Informações da Empresa</CardTitle>
+      <CardHeader className="flex flex-row items-center justify-between">
+        <div>
+          <CardTitle>Informações da Empresa</CardTitle>
+          <CardDescription>
+            Gerir as informações gerais da empresa
+          </CardDescription>
+        </div>
+        <ImportExportButtons
+          onExport={exportData}
+          onImport={importData}
+          exportFilename="empresa_info"
+        />
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">

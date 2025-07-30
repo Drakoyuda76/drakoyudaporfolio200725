@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
+import ImportExportButtons from './ImportExportButtons';
 
 interface ContactInfo {
   id?: string;
@@ -94,6 +95,62 @@ const ContactInfoForm = () => {
     }
   };
 
+  const exportData = () => {
+    const exportData = {
+      ...formData,
+      exported_at: new Date().toISOString()
+    };
+    
+    const dataStr = JSON.stringify(exportData, null, 2);
+    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+    
+    const exportFileDefaultName = `contactos_${new Date().toISOString().split('T')[0]}.json`;
+    
+    const linkElement = document.createElement('a');
+    linkElement.setAttribute('href', dataUri);
+    linkElement.setAttribute('download', exportFileDefaultName);
+    linkElement.click();
+    
+    toast({
+      title: "Sucesso!",
+      description: "Contactos exportados com sucesso.",
+    });
+  };
+
+  const importData = async (data: any) => {
+    try {
+      const newFormData = {
+        id: formData.id,
+        telefone: data.telefone || '',
+        email_geral: data.email_geral || '',
+        email_parcerias: data.email_parcerias || '',
+        endereco: data.endereco || '',
+        linkedin_url: data.linkedin_url || ''
+      };
+
+      setFormData(newFormData);
+
+      if (formData.id) {
+        const { error } = await supabase
+          .from('empresa_contactos')
+          .update(newFormData)
+          .eq('id', formData.id);
+
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from('empresa_contactos')
+          .insert([newFormData]);
+
+        if (error) throw error;
+      }
+
+      await loadContactInfo();
+    } catch (error) {
+      throw error;
+    }
+  };
+
   if (initialLoad) {
     return (
       <Card>
@@ -108,8 +165,18 @@ const ContactInfoForm = () => {
 
   return (
     <Card>
-      <CardHeader>
-        <CardTitle>Informações de Contacto</CardTitle>
+      <CardHeader className="flex flex-row items-center justify-between">
+        <div>
+          <CardTitle>Informações de Contacto</CardTitle>
+          <CardDescription>
+            Gerir os contactos da empresa
+          </CardDescription>
+        </div>
+        <ImportExportButtons
+          onExport={exportData}
+          onImport={importData}
+          exportFilename="contactos"
+        />
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
