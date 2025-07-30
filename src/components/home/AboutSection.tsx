@@ -13,6 +13,7 @@ const AboutSection = () => {
     historia: 'Fundada com o propósito de transformar a realidade tecnológica de Angola, a Drakoyuda nasceu da visão de criar soluções que realmente fazem a diferença.',
     fundacao_ano: 2020
   });
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     loadCompanyInfo();
@@ -20,13 +21,14 @@ const AboutSection = () => {
 
   const loadCompanyInfo = async () => {
     try {
+      setLoading(true);
       const { data, error } = await supabase
         .from('empresa_info')
         .select('*')
-        .single();
+        .maybeSingle();
 
       if (error) {
-        console.error('Error loading company info:', error);
+        console.error('Erro ao carregar informações da empresa:', error);
         return;
       }
 
@@ -41,7 +43,9 @@ const AboutSection = () => {
         });
       }
     } catch (error) {
-      console.error('Error loading company info:', error);
+      console.error('Erro ao carregar informações da empresa:', error);
+    } finally {
+      setLoading(false);
     }
   };
   const values = [

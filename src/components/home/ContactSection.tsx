@@ -10,6 +10,7 @@ const ContactSection = () => {
     email_geral: 'drakoyuda76@gmail.com',
     email_parcerias: 'drakoyuda76@gmail.com'
   });
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     loadContactInfo();
@@ -17,13 +18,14 @@ const ContactSection = () => {
 
   const loadContactInfo = async () => {
     try {
+      setLoading(true);
       const { data, error } = await supabase
         .from('empresa_contactos')
         .select('*')
-        .single();
+        .maybeSingle();
 
       if (error) {
-        console.error('Error loading contact info:', error);
+        console.error('Erro ao carregar informações de contacto:', error);
         return;
       }
 
@@ -34,7 +36,9 @@ const ContactSection = () => {
         });
       }
     } catch (error) {
-      console.error('Error loading contact info:', error);
+      console.error('Erro ao carregar informações de contacto:', error);
+    } finally {
+      setLoading(false);
     }
   };
   return (

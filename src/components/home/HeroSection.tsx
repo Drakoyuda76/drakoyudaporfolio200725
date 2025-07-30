@@ -39,10 +39,9 @@ const HeroSection = () => {
       const { data: estatisticasData, error: estatisticasError } = await supabase
         .from('estatisticas')
         .select('*')
-        .limit(1)
-        .single();
+        .maybeSingle();
 
-      if (estatisticasError && estatisticasError.code !== 'PGRST116') {
+      if (estatisticasError) {
         console.error('Erro ao carregar estatísticas:', estatisticasError);
       }
       

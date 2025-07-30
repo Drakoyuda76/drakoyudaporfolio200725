@@ -40,9 +40,9 @@ const CompanyInfoForm = () => {
       const { data, error } = await supabase
         .from('empresa_info')
         .select('*')
-        .single();
+        .maybeSingle();
 
-      if (error && error.code !== 'PGRST116') {
+      if (error) {
         console.error('Error loading company info:', error);
         return;
       }

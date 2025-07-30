@@ -37,9 +37,9 @@ const StatisticsForm = () => {
       const { data, error } = await supabase
         .from('estatisticas')
         .select('*')
-        .single();
+        .maybeSingle();
 
-      if (error && error.code !== 'PGRST116') {
+      if (error) {
         console.error('Error loading statistics:', error);
         return;
       }

@@ -37,9 +37,9 @@ const ContactInfoForm = () => {
       const { data, error } = await supabase
         .from('empresa_contactos')
         .select('*')
-        .single();
+        .maybeSingle();
 
-      if (error && error.code !== 'PGRST116') {
+      if (error) {
         console.error('Error loading contact info:', error);
         return;
       }

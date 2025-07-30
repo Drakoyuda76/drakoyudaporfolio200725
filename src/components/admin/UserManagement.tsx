@@ -8,6 +8,7 @@ import { Loader2, Plus, Edit2, Trash2, Download, Upload } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import ImportExportButtons from './ImportExportButtons';
 
 interface User {
   id: string;
@@ -143,7 +144,7 @@ const UserManagement = () => {
     }
   };
 
-  const exportUsers = () => {
+  const exportData = () => {
     const exportData = users.map(user => ({
       name: user.name,
       email: user.email,
@@ -167,19 +168,13 @@ const UserManagement = () => {
     });
   };
 
-  const importUsers = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
+  const importData = async (data: any) => {
     try {
-      const text = await file.text();
-      const importData = JSON.parse(text);
-      
-      if (!Array.isArray(importData)) {
+      if (!Array.isArray(data)) {
         throw new Error('Formato de arquivo inválido. Esperado um array de usuários.');
       }
 
-      for (const userData of importData) {
+      for (const userData of data) {
         await supabase
           .from('admin_users')
           .insert({
@@ -191,21 +186,13 @@ const UserManagement = () => {
 
       toast({
         title: "Sucesso!",
-        description: `${importData.length} usuários importados com sucesso.`,
+        description: `${data.length} usuários importados com sucesso.`,
       });
 
       await loadUsers();
     } catch (error) {
-      console.error('Erro ao importar usuários:', error);
-      toast({
-        title: "Erro",
-        description: "Erro ao importar usuários. Verifique o formato do arquivo.",
-        variant: "destructive",
-      });
+      throw error;
     }
-
-    // Reset file input
-    event.target.value = '';
   };
 
   return (
@@ -218,28 +205,11 @@ const UserManagement = () => {
           </CardDescription>
         </div>
         <div className="flex items-center gap-2">
-          <Button 
-            variant="outline" 
-            onClick={exportUsers}
-            className="flex items-center gap-2"
-          >
-            <Download className="w-4 h-4" />
-            Exportar JSON
-          </Button>
-          <label className="cursor-pointer">
-            <Button variant="outline" className="flex items-center gap-2" asChild>
-              <span>
-                <Upload className="w-4 h-4" />
-                Importar JSON
-              </span>
-            </Button>
-            <input
-              type="file"
-              accept=".json"
-              onChange={importUsers}
-              className="hidden"
-            />
-          </label>
+          <ImportExportButtons
+            onExport={exportData}
+            onImport={importData}
+            exportFilename="usuarios"
+          />
           <Dialog open={showForm} onOpenChange={setShowForm}>
             <DialogTrigger asChild>
               <Button className="flex items-center gap-2">
