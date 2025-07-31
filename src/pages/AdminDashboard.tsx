@@ -514,15 +514,15 @@ export default function AdminDashboard() {
       const importData = JSON.parse(text);
       
       if (type === 'solutions') {
-        await importSolutions(importData);
+        await importSolutionsToForm(importData);
       } else if (type === 'statistics') {
-        await importStatistics(importData);
+        await importStatisticsToForm(importData);
       } else if (type === 'company') {
-        await importCompanyInfo(importData);
+        await importCompanyInfoToForm(importData);
       } else if (type === 'contacts') {
-        await importContacts(importData);
+        await importContactsToForm(importData);
       } else if (type === 'users') {
-        await importUsers(importData);
+        await importUsersToForm(importData);
       }
       
       event.target.value = '';
@@ -536,6 +536,117 @@ export default function AdminDashboard() {
     }
   };
 
+  // NOVAS FUNÇÕES: Importar dados diretamente nos formulários (PRÉ-PREENCHIMENTO)
+  const importSolutionsToForm = async (data: any[]) => {
+    if (!Array.isArray(data) || data.length === 0) throw new Error('Formato inválido');
+    
+    // Pegar primeira solução dos dados importados e pré-preencher no formulário de nova solução
+    const firstSolution = data[0];
+    
+    // Remover campos de imagem/ícone como solicitado
+    const cleanSolution = {
+      ...firstSolution,
+      icon_url: null,
+      images_urls: []
+    };
+    
+    // Navegar para aba de nova solução e pré-preencher
+    setActiveTab('nova-solucao');
+    setEditingSolution(cleanSolution as any);
+    setShowSolutionForm(true);
+    
+    toast({
+      title: "Sucesso!",
+      description: "Dados importados no formulário. Revise e salve.",
+    });
+  };
+
+  const importStatisticsToForm = async (data: any) => {
+    // Pré-preencher formulário de estatísticas
+    const newStats = {
+      total_solucoes: data.total_solucoes || 0,
+      solucoes_ativas: data.solucoes_ativas || 0,
+      parcerias_ativas: data.parcerias_ativas || 0,
+      total_horas_poupadas: data.total_horas_poupadas || 0,
+      total_utilizadores_impactados: data.total_utilizadores_impactados || 0
+    };
+    
+    setEstatisticas(prev => ({ ...prev, ...newStats } as any));
+    setActiveTab('dashboard');
+    
+    toast({
+      title: "Sucesso!",
+      description: "Estatísticas pré-preenchidas no formulário.",
+    });
+  };
+
+  const importCompanyInfoToForm = async (data: any) => {
+    // Pré-preencher formulário de empresa
+    const newCompanyInfo = {
+      missao: data.missao || '',
+      visao: data.visao || '',
+      valores: data.valores || [],
+      fundacao_ano: data.fundacao_ano || 0,
+      historia: data.historia || ''
+    };
+    
+    setValoresEmpresa(prev => ({ ...prev, ...newCompanyInfo } as any));
+    setActiveTab('empresa');
+    
+    toast({
+      title: "Sucesso!",
+      description: "Informações da empresa pré-preenchidas no formulário.",
+    });
+  };
+
+  const importContactsToForm = async (data: any) => {
+    // Pré-preencher formulário de contactos
+    const newContacts = {
+      email_geral: data.email_geral || '',
+      email_parcerias: data.email_parcerias || '',
+      telefone: data.telefone || '',
+      endereco: data.endereco || '',
+      linkedin_url: data.linkedin_url || ''
+    };
+    
+    setContacto(prev => ({ ...prev, ...newContacts } as any));
+    setActiveTab('contactos');
+    
+    toast({
+      title: "Sucesso!",
+      description: "Contactos pré-preenchidos no formulário.",
+    });
+  };
+
+  const importUsersToForm = async (data: any) => {
+    // Pré-preencher primeiro admin se existir
+    if (data.admin_users && data.admin_users.length > 0) {
+      const firstAdmin = data.admin_users[0];
+      setNewAdminName(firstAdmin.name || '');
+      setNewAdminEmail(firstAdmin.email || '');
+      setNewAdminPassword(''); // Por segurança, deixar vazio
+      setActiveTab('admins');
+    }
+    
+    // Pré-preencher primeiro usuário app se existir
+    if (data.app_users && data.app_users.length > 0) {
+      const firstUser = data.app_users[0];
+      setNewUserUsername(firstUser.username || '');
+      setNewUserEmail(firstUser.email || '');
+      setNewUserPassword(''); // Por segurança, deixar vazio
+      
+      if (!data.admin_users || data.admin_users.length === 0) {
+        setActiveTab('usuarios');
+      }
+    }
+    
+    toast({
+      title: "Sucesso!",
+      description: "Dados de usuários pré-preenchidos nos formulários.",
+    });
+  };
+
+  // FUNÇÕES ORIGINAIS: Importar e salvar diretamente na base de dados
   const importSolutions = async (data: any[]) => {
     if (!Array.isArray(data)) throw new Error('Formato inválido');
     
