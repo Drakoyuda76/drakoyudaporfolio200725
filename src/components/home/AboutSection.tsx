@@ -17,6 +17,22 @@ const AboutSection = () => {
 
   useEffect(() => {
     loadCompanyInfo();
+
+    // Listen for real-time updates
+    const channel = supabase
+      .channel('company_info_changes')
+      .on('postgres_changes', 
+        { event: '*', schema: 'public', table: 'empresa_info' },
+        (payload) => {
+          console.log('Company info updated', payload);
+          loadCompanyInfo();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const loadCompanyInfo = async () => {
@@ -26,22 +42,22 @@ const AboutSection = () => {
         .from('empresa_info')
         .select('*')
         .order('updated_at', { ascending: false })
-        .limit(1)
-        .single();
+        .limit(1);
 
-      if (error && error.code !== 'PGRST116') {
+      if (error) {
         console.error('Erro ao carregar informações da empresa:', error);
         return;
       }
 
-      if (data) {
+      if (data && data.length > 0) {
+        const record = data[0];
         setCompanyInfo({
-          nome: data.nome || 'Drakoyuda',
-          descricao: data.descricao || 'Transformamos negócios através de soluções tecnológicas inovadoras, criando um impacto positivo na sociedade angolana.',
-          missao: data.missao || 'Democratizar o acesso à tecnologia e criar soluções que impactem positivamente a vida das pessoas e organizações em Angola.',
-          visao: data.visao || 'Ser a empresa de tecnologia líder em Angola, reconhecida pela inovação e impacto social.',
-          historia: data.historia || 'Fundada com o propósito de transformar a realidade tecnológica de Angola, a Drakoyuda nasceu da visão de criar soluções que realmente fazem a diferença.',
-          fundacao_ano: data.fundacao_ano || 2020
+          nome: record.nome || 'Drakoyuda',
+          descricao: record.descricao || 'Transformamos negócios através de soluções tecnológicas inovadoras, criando um impacto positivo na sociedade angolana.',
+          missao: record.missao || 'Democratizar o acesso à tecnologia e criar soluções que impactem positivamente a vida das pessoas e organizações em Angola.',
+          visao: record.visao || 'Ser a empresa de tecnologia líder em Angola, reconhecida pela inovação e impacto social.',
+          historia: record.historia || 'Fundada com o propósito de transformar a realidade tecnológica de Angola, a Drakoyuda nasceu da visão de criar soluções que realmente fazem a diferença.',
+          fundacao_ano: record.fundacao_ano || 2020
         });
       }
     } catch (error) {

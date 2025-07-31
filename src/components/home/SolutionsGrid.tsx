@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { Filter, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { getStatusLabel, getBusinessAreaLabel } from '@/data/solutions';
 import SolutionCard from '@/components/ui/solution-card';
 import { supabase } from '@/integrations/supabase/client';
 import type { SolutionStatus, BusinessArea, Solution } from '@/types/solution';
@@ -15,6 +14,22 @@ const SolutionsGrid = () => {
 
   useEffect(() => {
     loadSolutions();
+
+    // Listen for real-time updates
+    const channel = supabase
+      .channel('solutions_changes')
+      .on('postgres_changes', 
+        { event: '*', schema: 'public', table: 'solucoes' },
+        (payload) => {
+          console.log('Solutions updated', payload);
+          loadSolutions();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const loadSolutions = async () => {
@@ -75,6 +90,28 @@ const SolutionsGrid = () => {
       solution.businessAreaImpact.includes(businessAreaFilter);
     return statusMatch && businessAreaMatch;
   });
+
+  const getStatusLabel = (status: string): string => {
+    const labels = {
+      'teste-convite': 'Teste por Convite',
+      'prototipo': 'Protótipo',
+      'parceria': 'Pronto para Parceria',
+      'live': 'Live',
+      'conceito': 'Conceito',
+      'teste-usuarios': 'Teste de Utilizadores',
+    };
+    return labels[status as keyof typeof labels] || status;
+  };
+
+  const getBusinessAreaLabel = (area: string): string => {
+    const labels = {
+      'front-office': 'Front Office',
+      'back-office': 'Back Office', 
+      'core-capabilities': 'Core Capabilities',
+      'products-services': 'Products & Services',
+    };
+    return labels[area as keyof typeof labels] || area;
+  };
 
   const allStatuses: (SolutionStatus | 'all')[] = ['all', 'live', 'parceria', 'teste-usuarios', 'prototipo', 'teste-convite', 'conceito'];
   const allBusinessAreas: (BusinessArea | 'all')[] = ['all', 'front-office', 'back-office', 'core-capabilities', 'products-services'];

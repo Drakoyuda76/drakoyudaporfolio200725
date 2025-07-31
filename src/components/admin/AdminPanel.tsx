@@ -10,6 +10,7 @@ import CompanyInfoForm from './CompanyInfoForm';
 import ContactInfoForm from './ContactInfoForm';
 import StatisticsForm from './StatisticsForm';
 import UserManagement from './UserManagement';
+import AdminUsersForm from './AdminUsersForm';
 import ImportExportButtons from './ImportExportButtons';
 
 const AdminPanel = () => {
@@ -186,7 +187,7 @@ const AdminPanel = () => {
         </div>
 
         <Tabs defaultValue="solutions" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="solutions" className="flex items-center gap-2">
               <FileText className="w-4 h-4" />
               Soluções
@@ -203,8 +204,12 @@ const AdminPanel = () => {
               <BarChart3 className="w-4 h-4" />
               Estatísticas
             </TabsTrigger>
-            <TabsTrigger value="users" className="flex items-center gap-2">
+            <TabsTrigger value="admins" className="flex items-center gap-2">
               <Settings className="w-4 h-4" />
+              Administradores
+            </TabsTrigger>
+            <TabsTrigger value="users" className="flex items-center gap-2">
+              <Users className="w-4 h-4" />
               Usuários
             </TabsTrigger>
           </TabsList>
@@ -304,6 +309,10 @@ const AdminPanel = () => {
 
           <TabsContent value="statistics">
             <StatisticsForm />
+          </TabsContent>
+
+          <TabsContent value="admins">
+            <AdminUsersForm />
           </TabsContent>
 
           <TabsContent value="users">

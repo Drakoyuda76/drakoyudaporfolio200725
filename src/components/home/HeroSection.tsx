@@ -31,6 +31,22 @@ const HeroSection = () => {
 
   useEffect(() => {
     loadStatistics();
+
+    // Listen for real-time updates
+    const channel = supabase
+      .channel('statistics_changes')
+      .on('postgres_changes', 
+        { event: '*', schema: 'public', table: 'estatisticas' },
+        (payload) => {
+          console.log('Statistics updated', payload);
+          loadStatistics();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const loadStatistics = async () => {
@@ -40,11 +56,12 @@ const HeroSection = () => {
         .from('estatisticas')
         .select('*')
         .order('updated_at', { ascending: false })
-        .limit(1)
-        .single();
+        .limit(1);
 
-      if (estatisticasError && estatisticasError.code !== 'PGRST116') {
+      if (estatisticasError) {
         console.error('Erro ao carregar estatísticas:', estatisticasError);
+      } else if (estatisticasData && estatisticasData.length > 0) {
+        setEstatisticas(estatisticasData[0]);
       }
       
       // Carregar soluções para calcular áreas de negócio e ODS
@@ -56,7 +73,6 @@ const HeroSection = () => {
         console.error('Erro ao carregar soluções:', solucoesError);
       }
 
-      setEstatisticas(estatisticasData);
       setSolucoes(solucoesData || []);
     } catch (error) {
       console.error('Erro ao carregar dados:', error);

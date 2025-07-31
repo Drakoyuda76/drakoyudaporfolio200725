@@ -14,6 +14,22 @@ const ContactSection = () => {
 
   useEffect(() => {
     loadContactInfo();
+
+    // Listen for real-time updates  
+    const channel = supabase
+      .channel('contact_info_changes')
+      .on('postgres_changes', 
+        { event: '*', schema: 'public', table: 'empresa_contactos' },
+        (payload) => {
+          console.log('Contact info updated', payload);
+          loadContactInfo();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   const loadContactInfo = async () => {
@@ -23,18 +39,18 @@ const ContactSection = () => {
         .from('empresa_contactos')
         .select('*')
         .order('updated_at', { ascending: false })
-        .limit(1)
-        .single();
+        .limit(1);
 
-      if (error && error.code !== 'PGRST116') {
+      if (error) {
         console.error('Erro ao carregar informações de contacto:', error);
         return;
       }
 
-      if (data) {
+      if (data && data.length > 0) {
+        const record = data[0];
         setContactInfo({
-          email_geral: data.email_geral || 'drakoyuda76@gmail.com',
-          email_parcerias: data.email_parcerias || 'drakoyuda76@gmail.com'
+          email_geral: record.email_geral || 'drakoyuda76@gmail.com',
+          email_parcerias: record.email_parcerias || 'drakoyuda76@gmail.com'
         });
       }
     } catch (error) {
