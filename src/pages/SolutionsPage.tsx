@@ -29,7 +29,16 @@ const SolutionsPage = () => {
       </main>
       
       {/* BotBwala Chatbot - Fixed na lateral direita */}
-      <div className="fixed bottom-4 right-4 z-50">
+      <div 
+        className="fixed bottom-4 right-4" 
+        style={{ 
+          zIndex: 9999, 
+          position: 'fixed',
+          display: 'block',
+          visibility: 'visible',
+          opacity: 1
+        }}
+      >
         <iframe 
           src="https://87cfebbd-659b-481a-91f0-a323e38fd0d3.lovableproject.com/embed/system/95999609-cf1f-4aaf-965f-5133876efd11"
           style={{ width: '500px', height: '650px', border: 'none' }}
