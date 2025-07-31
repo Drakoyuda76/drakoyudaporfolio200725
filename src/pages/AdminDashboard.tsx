@@ -23,7 +23,9 @@ import {
   Trash2,
   Upload,
   Search,
-  Shield
+  Shield,
+  Download,
+  FileText
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
@@ -83,6 +85,22 @@ interface Contacto {
   linkedin_url: string;
 }
 
+interface AdminUser {
+  id: string;
+  email: string;
+  name: string;
+  created_at: string;
+  last_login: string | null;
+}
+
+interface AppUser {
+  id: string;
+  username: string;
+  email: string;
+  created_at: string;
+  last_login: string | null;
+}
+
 export default function AdminDashboard() {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -96,6 +114,12 @@ export default function AdminDashboard() {
   const [searchTerm, setSearchTerm] = useState('');
   const [newAdminEmail, setNewAdminEmail] = useState('');
   const [newAdminPassword, setNewAdminPassword] = useState('');
+  const [newAdminName, setNewAdminName] = useState('');
+  const [adminUsers, setAdminUsers] = useState<AdminUser[]>([]);
+  const [appUsers, setAppUsers] = useState<AppUser[]>([]);
+  const [newUserUsername, setNewUserUsername] = useState('');
+  const [newUserEmail, setNewUserEmail] = useState('');
+  const [newUserPassword, setNewUserPassword] = useState('');
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -158,15 +182,37 @@ export default function AdminDashboard() {
 
       // Carregar contacto
       const { data: contactoData, error: contactoError } = await supabase
-        .from('contacto')
+        .from('empresa_contactos')
         .select('*')
-        .limit(1)
-        .single();
+        .order('updated_at', { ascending: false })
+        .limit(1);
 
       if (contactoError && contactoError.code !== 'PGRST116') {
         console.error('Erro ao carregar contacto:', contactoError);
       }
-      setContacto(contactoData);
+      setContacto(contactoData?.[0]);
+
+      // Carregar usuários admin
+      const { data: adminData, error: adminError } = await supabase
+        .from('admin_users')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (adminError) {
+        console.error('Erro ao carregar admin users:', adminError);
+      }
+      setAdminUsers(adminData || []);
+
+      // Carregar usuários app
+      const { data: appUsersData, error: appUsersError } = await supabase
+        .from('app_users')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (appUsersError) {
+        console.error('Erro ao carregar app users:', appUsersError);
+      }
+      setAppUsers(appUsersData || []);
 
     } catch (error) {
       console.error('Erro ao carregar dados:', error);
@@ -279,17 +325,25 @@ export default function AdminDashboard() {
     if (!contacto) return;
 
     try {
-      const { error } = await supabase
-        .from('contacto')
-        .update(contacto)
-        .eq('id', (contacto as any).id);
-
-      if (error) throw error;
+      if ((contacto as any).id) {
+        const { error } = await supabase
+          .from('empresa_contactos')
+          .update(contacto)
+          .eq('id', (contacto as any).id);
+        if (error) throw error;
+      } else {
+        const { error } = await supabase
+          .from('empresa_contactos')
+          .insert(contacto);
+        if (error) throw error;
+      }
 
       toast({
         title: "Contactos atualizados",
         description: "As informações de contacto foram atualizadas com sucesso.",
       });
+      
+      await loadDashboardData();
     } catch (error) {
       console.error('Erro ao atualizar contacto:', error);
       toast({
@@ -301,10 +355,10 @@ export default function AdminDashboard() {
   };
 
   const handleAddAdmin = async () => {
-    if (!newAdminEmail || !newAdminPassword) {
+    if (!newAdminEmail || !newAdminPassword || !newAdminName) {
       toast({
         title: "Erro",
-        description: "Email e senha são obrigatórios.",
+        description: "Nome, email e senha são obrigatórios.",
         variant: "destructive",
       });
       return;
@@ -316,7 +370,7 @@ export default function AdminDashboard() {
         .insert({
           email: newAdminEmail,
           password_hash: newAdminPassword,
-          name: 'Administrador'
+          name: newAdminName
         });
 
       if (error) throw error;
@@ -328,6 +382,8 @@ export default function AdminDashboard() {
 
       setNewAdminEmail('');
       setNewAdminPassword('');
+      setNewAdminName('');
+      await loadDashboardData();
     } catch (error) {
       console.error('Erro ao adicionar administrador:', error);
       toast({
@@ -336,6 +392,235 @@ export default function AdminDashboard() {
         variant: "destructive",
       });
     }
+  };
+
+  const handleAddUser = async () => {
+    if (!newUserUsername || !newUserEmail || !newUserPassword) {
+      toast({
+        title: "Erro",
+        description: "Username, email e senha são obrigatórios.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('app_users')
+        .insert({
+          username: newUserUsername,
+          email: newUserEmail,
+          password_hash: newUserPassword
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: "Usuário adicionado",
+        description: "Novo usuário foi adicionado com sucesso.",
+      });
+
+      setNewUserUsername('');
+      setNewUserEmail('');
+      setNewUserPassword('');
+      await loadDashboardData();
+    } catch (error) {
+      console.error('Erro ao adicionar usuário:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao adicionar usuário.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  // Funções de Export/Import
+  const exportSolutions = () => {
+    const exportData = solucoes.map(solution => ({
+      title: solution.title,
+      subtitle: solution.subtitle,
+      description: solution.description,
+      problem_solution: solution.problem_solution,
+      business_area_impact: solution.business_area_impact,
+      sdg_goals: solution.sdg_goals,
+      times_saved: solution.times_saved,
+      users_impacted: solution.users_impacted,
+      status: solution.status,
+      sustainability_impact: solution.sustainability_impact,
+      human_impact: solution.human_impact
+    }));
+    
+    downloadJSON(exportData, `solucoes_${new Date().toISOString().split('T')[0]}.json`);
+  };
+
+  const exportStatistics = () => {
+    if (!estatisticas) return;
+    const exportData = {
+      total_solucoes: estatisticas.total_solucoes,
+      solucoes_ativas: estatisticas.solucoes_ativas,
+      parcerias_ativas: estatisticas.parcerias_ativas,
+      total_horas_poupadas: estatisticas.total_horas_poupadas,
+      total_utilizadores_impactados: estatisticas.total_utilizadores_impactados
+    };
+    
+    downloadJSON(exportData, `estatisticas_${new Date().toISOString().split('T')[0]}.json`);
+  };
+
+  const exportCompanyInfo = () => {
+    if (!valoresEmpresa) return;
+    downloadJSON(valoresEmpresa, `empresa_${new Date().toISOString().split('T')[0]}.json`);
+  };
+
+  const exportContacts = () => {
+    if (!contacto) return;
+    downloadJSON(contacto, `contactos_${new Date().toISOString().split('T')[0]}.json`);
+  };
+
+  const exportUsers = () => {
+    const exportData = {
+      admin_users: adminUsers.map(user => ({
+        name: user.name,
+        email: user.email
+      })),
+      app_users: appUsers.map(user => ({
+        username: user.username,
+        email: user.email
+      }))
+    };
+    
+    downloadJSON(exportData, `usuarios_${new Date().toISOString().split('T')[0]}.json`);
+  };
+
+  const downloadJSON = (data: any, filename: string) => {
+    const dataStr = JSON.stringify(data, null, 2);
+    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+    const linkElement = document.createElement('a');
+    linkElement.setAttribute('href', dataUri);
+    linkElement.setAttribute('download', filename);
+    linkElement.click();
+    
+    toast({
+      title: "Sucesso!",
+      description: "Dados exportados com sucesso.",
+    });
+  };
+
+  const handleImportFile = async (event: React.ChangeEvent<HTMLInputElement>, type: string) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    try {
+      const text = await file.text();
+      const importData = JSON.parse(text);
+      
+      if (type === 'solutions') {
+        await importSolutions(importData);
+      } else if (type === 'statistics') {
+        await importStatistics(importData);
+      } else if (type === 'company') {
+        await importCompanyInfo(importData);
+      } else if (type === 'contacts') {
+        await importContacts(importData);
+      } else if (type === 'users') {
+        await importUsers(importData);
+      }
+      
+      event.target.value = '';
+    } catch (error) {
+      console.error('Erro ao importar:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao importar dados. Verifique o formato do arquivo.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const importSolutions = async (data: any[]) => {
+    if (!Array.isArray(data)) throw new Error('Formato inválido');
+    
+    for (const solutionData of data) {
+      await supabase.from('solucoes').insert(solutionData);
+    }
+    
+    toast({
+      title: "Sucesso!",
+      description: `${data.length} soluções importadas.`,
+    });
+    
+    await loadDashboardData();
+  };
+
+  const importStatistics = async (data: any) => {
+    if ((estatisticas as any)?.id) {
+      await supabase.from('estatisticas').update(data).eq('id', (estatisticas as any).id);
+    } else {
+      await supabase.from('estatisticas').insert(data);
+    }
+    
+    toast({
+      title: "Sucesso!",
+      description: "Estatísticas importadas.",
+    });
+    
+    await loadDashboardData();
+  };
+
+  const importCompanyInfo = async (data: any) => {
+    if ((valoresEmpresa as any)?.id) {
+      await supabase.from('valores_empresa').update(data).eq('id', (valoresEmpresa as any).id);
+    } else {
+      await supabase.from('valores_empresa').insert(data);
+    }
+    
+    toast({
+      title: "Sucesso!",
+      description: "Informações da empresa importadas.",
+    });
+    
+    await loadDashboardData();
+  };
+
+  const importContacts = async (data: any) => {
+    if ((contacto as any)?.id) {
+      await supabase.from('empresa_contactos').update(data).eq('id', (contacto as any).id);
+    } else {
+      await supabase.from('empresa_contactos').insert(data);
+    }
+    
+    toast({
+      title: "Sucesso!",
+      description: "Contactos importados.",
+    });
+    
+    await loadDashboardData();
+  };
+
+  const importUsers = async (data: any) => {
+    if (data.admin_users) {
+      for (const adminData of data.admin_users) {
+        await supabase.from('admin_users').insert({
+          ...adminData,
+          password_hash: 'temp123'
+        });
+      }
+    }
+    
+    if (data.app_users) {
+      for (const userData of data.app_users) {
+        await supabase.from('app_users').insert({
+          ...userData,
+          password_hash: 'temp123'
+        });
+      }
+    }
+    
+    toast({
+      title: "Sucesso!",
+      description: "Usuários importados.",
+    });
+    
+    await loadDashboardData();
   };
 
   const getStatusColor = (status: string) => {
@@ -414,7 +699,7 @@ export default function AdminDashboard() {
 
       <div className="container mx-auto px-4 py-6">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-6">
+          <TabsList className="grid w-full grid-cols-7">
             <TabsTrigger value="dashboard">
               <BarChart3 className="h-4 w-4 mr-2" />
               Dashboard
@@ -438,6 +723,10 @@ export default function AdminDashboard() {
             <TabsTrigger value="admins">
               <Shield className="h-4 w-4 mr-2" />
               Admins
+            </TabsTrigger>
+            <TabsTrigger value="usuarios">
+              <Users className="h-4 w-4 mr-2" />
+              Usuários
             </TabsTrigger>
           </TabsList>
 
@@ -499,11 +788,33 @@ export default function AdminDashboard() {
 
             {/* Editar Estatísticas */}
             <Card>
-              <CardHeader>
-                <CardTitle>Editar Estatísticas</CardTitle>
-                <CardDescription>
-                  Atualizar métricas principais do dashboard
-                </CardDescription>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle>Editar Estatísticas</CardTitle>
+                  <CardDescription>
+                    Atualizar métricas principais do dashboard
+                  </CardDescription>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button variant="outline" onClick={exportStatistics}>
+                    <Download className="w-4 h-4 mr-2" />
+                    Exportar JSON
+                  </Button>
+                  <label className="cursor-pointer">
+                    <Button variant="outline" asChild>
+                      <span>
+                        <Upload className="w-4 h-4 mr-2" />
+                        Importar JSON
+                      </span>
+                    </Button>
+                    <input
+                      type="file"
+                      accept=".json"
+                      onChange={(e) => handleImportFile(e, 'statistics')}
+                      className="hidden"
+                    />
+                  </label>
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
@@ -540,7 +851,9 @@ export default function AdminDashboard() {
                     />
                   </div>
                 </div>
-                <Button onClick={handleUpdateEstatisticas}>Atualizar Estatísticas</Button>
+                <div className="flex gap-2">
+                  <Button onClick={handleUpdateEstatisticas}>Atualizar Estatísticas</Button>
+                </div>
               </CardContent>
             </Card>
 
@@ -581,10 +894,30 @@ export default function AdminDashboard() {
                       Gerir o portfólio completo de soluções DrakoYuda
                     </CardDescription>
                   </div>
-                  <Button onClick={() => setShowSolutionForm(true)}>
-                    <Plus className="h-4 w-4 mr-2" />
-                    Nova Solução
-                  </Button>
+                  <div className="flex items-center gap-2">
+                    <Button variant="outline" onClick={exportSolutions}>
+                      <Download className="w-4 h-4 mr-2" />
+                      Exportar JSON
+                    </Button>
+                    <label className="cursor-pointer">
+                      <Button variant="outline" asChild>
+                        <span>
+                          <Upload className="w-4 h-4 mr-2" />
+                          Importar JSON
+                        </span>
+                      </Button>
+                      <input
+                        type="file"
+                        accept=".json"
+                        onChange={(e) => handleImportFile(e, 'solutions')}
+                        className="hidden"
+                      />
+                    </label>
+                    <Button onClick={() => setShowSolutionForm(true)}>
+                      <Plus className="h-4 w-4 mr-2" />
+                      Nova Solução
+                    </Button>
+                  </div>
                 </div>
                 <div className="flex items-center space-x-2">
                   <Search className="h-4 w-4 text-muted-foreground" />
@@ -692,11 +1025,33 @@ export default function AdminDashboard() {
           {/* Empresa */}
           <TabsContent value="empresa">
             <Card>
-              <CardHeader>
-                <CardTitle>Informações da Empresa</CardTitle>
-                <CardDescription>
-                  Gerir missão, visão e valores da DrakoYuda
-                </CardDescription>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle>Informações da Empresa</CardTitle>
+                  <CardDescription>
+                    Gerir missão, visão e valores da DrakoYuda
+                  </CardDescription>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button variant="outline" onClick={exportCompanyInfo}>
+                    <Download className="w-4 h-4 mr-2" />
+                    Exportar JSON
+                  </Button>
+                  <label className="cursor-pointer">
+                    <Button variant="outline" asChild>
+                      <span>
+                        <Upload className="w-4 h-4 mr-2" />
+                        Importar JSON
+                      </span>
+                    </Button>
+                    <input
+                      type="file"
+                      accept=".json"
+                      onChange={(e) => handleImportFile(e, 'company')}
+                      className="hidden"
+                    />
+                  </label>
+                </div>
               </CardHeader>
               <CardContent className="space-y-6">
                 <div>
@@ -780,11 +1135,33 @@ export default function AdminDashboard() {
           {/* Contactos */}
           <TabsContent value="contactos">
             <Card>
-              <CardHeader>
-                <CardTitle>Gestão de Contactos</CardTitle>
-                <CardDescription>
-                  Atualizar informações de contacto e parcerias
-                </CardDescription>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle>Gestão de Contactos</CardTitle>
+                  <CardDescription>
+                    Atualizar informações de contacto e parcerias
+                  </CardDescription>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button variant="outline" onClick={exportContacts}>
+                    <Download className="w-4 h-4 mr-2" />
+                    Exportar JSON
+                  </Button>
+                  <label className="cursor-pointer">
+                    <Button variant="outline" asChild>
+                      <span>
+                        <Upload className="w-4 h-4 mr-2" />
+                        Importar JSON
+                      </span>
+                    </Button>
+                    <input
+                      type="file"
+                      accept=".json"
+                      onChange={(e) => handleImportFile(e, 'contacts')}
+                      className="hidden"
+                    />
+                  </label>
+                </div>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid md:grid-cols-2 gap-4">
@@ -837,18 +1214,49 @@ export default function AdminDashboard() {
           </TabsContent>
 
           {/* Gestão de Admins */}
-          <TabsContent value="admins">
+          <TabsContent value="admins" className="space-y-6">
             <Card>
-              <CardHeader>
-                <CardTitle>Gestão de Administradores</CardTitle>
-                <CardDescription>
-                  Adicionar novos administradores ao sistema
-                </CardDescription>
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle>Gestão de Administradores</CardTitle>
+                  <CardDescription>
+                    Adicionar e gerir administradores do sistema
+                  </CardDescription>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button variant="outline" onClick={exportUsers}>
+                    <Download className="w-4 h-4 mr-2" />
+                    Exportar JSON
+                  </Button>
+                  <label className="cursor-pointer">
+                    <Button variant="outline" asChild>
+                      <span>
+                        <Upload className="w-4 h-4 mr-2" />
+                        Importar JSON
+                      </span>
+                    </Button>
+                    <input
+                      type="file"
+                      accept=".json"
+                      onChange={(e) => handleImportFile(e, 'users')}
+                      className="hidden"
+                    />
+                  </label>
+                </div>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="grid md:grid-cols-2 gap-4">
+                <div className="grid md:grid-cols-3 gap-4">
                   <div>
-                    <Label htmlFor="new_admin_email">Email do Novo Admin</Label>
+                    <Label htmlFor="new_admin_name">Nome</Label>
+                    <Input
+                      id="new_admin_name"
+                      value={newAdminName}
+                      onChange={(e) => setNewAdminName(e.target.value)}
+                      placeholder="Nome do Administrador"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="new_admin_email">Email</Label>
                     <Input
                       id="new_admin_email"
                       type="email"
@@ -872,6 +1280,109 @@ export default function AdminDashboard() {
                   <Shield className="h-4 w-4 mr-2" />
                   Adicionar Administrador
                 </Button>
+              </CardContent>
+            </Card>
+
+            {/* Lista de Administradores */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Administradores Ativos</CardTitle>
+                <CardDescription>
+                  Lista de todos os administradores do sistema
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  {adminUsers.map((admin) => (
+                    <div key={admin.id} className="flex items-center justify-between p-3 border rounded-lg">
+                      <div>
+                        <p className="font-medium">{admin.name}</p>
+                        <p className="text-sm text-muted-foreground">{admin.email}</p>
+                        <p className="text-xs text-muted-foreground">
+                          Criado: {new Date(admin.created_at).toLocaleDateString()}
+                          {admin.last_login && ` | Último acesso: ${new Date(admin.last_login).toLocaleDateString()}`}
+                        </p>
+                      </div>
+                      <Badge variant="secondary">Admin</Badge>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Gestão de Usuários */}
+          <TabsContent value="usuarios" className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Gestão de Usuários</CardTitle>
+                <CardDescription>
+                  Adicionar e gerir usuários da aplicação
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid md:grid-cols-3 gap-4">
+                  <div>
+                    <Label htmlFor="new_user_username">Username</Label>
+                    <Input
+                      id="new_user_username"
+                      value={newUserUsername}
+                      onChange={(e) => setNewUserUsername(e.target.value)}
+                      placeholder="username"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="new_user_email">Email</Label>
+                    <Input
+                      id="new_user_email"
+                      type="email"
+                      value={newUserEmail}
+                      onChange={(e) => setNewUserEmail(e.target.value)}
+                      placeholder="user@email.com"
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="new_user_password">Senha</Label>
+                    <Input
+                      id="new_user_password"
+                      type="password"
+                      value={newUserPassword}
+                      onChange={(e) => setNewUserPassword(e.target.value)}
+                      placeholder="Senha forte"
+                    />
+                  </div>
+                </div>
+                <Button onClick={handleAddUser}>
+                  <Users className="h-4 w-4 mr-2" />
+                  Adicionar Usuário
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* Lista de Usuários */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Usuários Registados</CardTitle>
+                <CardDescription>
+                  Lista de todos os usuários da aplicação
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  {appUsers.map((user) => (
+                    <div key={user.id} className="flex items-center justify-between p-3 border rounded-lg">
+                      <div>
+                        <p className="font-medium">@{user.username}</p>
+                        <p className="text-sm text-muted-foreground">{user.email}</p>
+                        <p className="text-xs text-muted-foreground">
+                          Criado: {new Date(user.created_at).toLocaleDateString()}
+                          {user.last_login && ` | Último acesso: ${new Date(user.last_login).toLocaleDateString()}`}
+                        </p>
+                      </div>
+                      <Badge variant="outline">Usuário</Badge>
+                    </div>
+                  ))}
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
