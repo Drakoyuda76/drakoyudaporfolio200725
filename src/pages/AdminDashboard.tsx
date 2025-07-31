@@ -937,7 +937,8 @@ export default function AdminDashboard() {
               onClick={() => {
                 // Marcar que admin está visualizando como visitante
                 localStorage.setItem("isAdminViewingAsVisitor", "true");
-                window.open('/', '_blank');
+                // Navegar internamente para a página pública (mesma aba)
+                navigate('/');
               }}
             >
               <Eye className="h-4 w-4 mr-2" />
