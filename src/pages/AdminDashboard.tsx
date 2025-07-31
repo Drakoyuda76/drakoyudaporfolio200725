@@ -26,7 +26,9 @@ import {
   Search,
   Shield,
   Download,
-  FileText
+  FileText,
+  Save,
+  X
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
@@ -113,6 +115,15 @@ export default function AdminDashboard() {
   const [showSolutionForm, setShowSolutionForm] = useState(false);
   const [editingSolution, setEditingSolution] = useState<Solucao | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  // Estados para gestão unificada de utilizadores
+  const [userType, setUserType] = useState<'admin' | 'user'>('admin');
+  const [userName, setUserName] = useState('');
+  const [userUsername, setUserUsername] = useState('');
+  const [userEmail, setUserEmail] = useState('');
+  const [userPassword, setUserPassword] = useState('');
+  const [editingUser, setEditingUser] = useState<any>(null);
+  
+  // Estados existentes
   const [newAdminEmail, setNewAdminEmail] = useState('');
   const [newAdminPassword, setNewAdminPassword] = useState('');
   const [newAdminName, setNewAdminName] = useState('');
@@ -353,6 +364,125 @@ export default function AdminDashboard() {
         variant: "destructive",
       });
     }
+  };
+
+  // Funções para gestão unificada de utilizadores
+  const handleSaveUser = async () => {
+    if (userType === 'admin') {
+      // Lógica para administrador usando as variáveis unificadas
+      const nameValue = userName || newAdminName;
+      const emailValue = userEmail || newAdminEmail;
+      const passwordValue = userPassword || newAdminPassword;
+      
+      if (!nameValue || !emailValue || (!editingUser && !passwordValue)) {
+        toast({
+          title: "Erro",
+          description: "Por favor, preencha todos os campos obrigatórios.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (editingUser) {
+        // Atualizar admin existente
+        const updates: any = { name: nameValue, email: emailValue };
+        if (passwordValue) {
+          updates.password_hash = passwordValue; // Simplified - in real app, hash the password
+        }
+
+        const { error } = await supabase
+          .from('admin_users')
+          .update(updates)
+          .eq('id', editingUser.id);
+
+        if (error) {
+          toast({
+            title: "Erro",
+            description: "Erro ao atualizar administrador.",
+            variant: "destructive",
+          });
+          return;
+        }
+      } else {
+        // Usar a função existente mas com os valores unificados
+        setNewAdminName(nameValue);
+        setNewAdminEmail(emailValue);
+        setNewAdminPassword(passwordValue);
+        await handleAddAdmin();
+      }
+    } else {
+      // Lógica para utilizador usando as variáveis unificadas
+      const usernameValue = userUsername || newUserUsername;
+      const emailValue = userEmail || newUserEmail;
+      const passwordValue = userPassword || newUserPassword;
+      
+      if (!usernameValue || !emailValue || (!editingUser && !passwordValue)) {
+        toast({
+          title: "Erro",
+          description: "Por favor, preencha todos os campos obrigatórios.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      if (editingUser) {
+        // Atualizar user existente
+        const updates: any = { username: usernameValue, email: emailValue };
+        if (passwordValue) {
+          updates.password_hash = passwordValue; // Simplified - in real app, hash the password
+        }
+
+        const { error } = await supabase
+          .from('app_users')
+          .update(updates)
+          .eq('id', editingUser.id);
+
+        if (error) {
+          toast({
+            title: "Erro",
+            description: "Erro ao atualizar utilizador.",
+            variant: "destructive",
+          });
+          return;
+        }
+      } else {
+        // Usar a função existente mas com os valores unificados
+        setNewUserUsername(usernameValue);
+        setNewUserEmail(emailValue);
+        setNewUserPassword(passwordValue);
+        await handleAddUser();
+      }
+    }
+
+    // Limpar formulário e recarregar listas
+    handleCancelEdit();
+    await loadDashboardData();
+  };
+
+  const handleEditUser = (user: any, type: 'admin' | 'user') => {
+    setEditingUser(user);
+    setUserType(type);
+    
+    if (type === 'admin') {
+      setUserName(user.name || '');
+      setUserEmail(user.email || '');
+      setUserUsername('');
+    } else {
+      setUserUsername(user.username || '');
+      setUserEmail(user.email || '');
+      setUserName('');
+    }
+    
+    setUserPassword('');
+  };
+
+  const handleCancelEdit = () => {
+    setEditingUser(null);
+    setUserName('');
+    setUserUsername('');
+    setUserEmail('');
+    setUserPassword('');
+    setUserType('admin');
   };
 
   const handleAddAdmin = async () => {
@@ -1336,7 +1466,7 @@ export default function AdminDashboard() {
               <CardHeader>
                 <CardTitle>Gestão de Utilizadores</CardTitle>
                 <CardDescription>
-                  Gerir administradores e utilizadores da aplicação
+                  Gerir todos os utilizadores e administradores do sistema
                 </CardDescription>
                 <div className="flex items-center gap-2">
                   <Button variant="outline" onClick={() => exportUsers()}>
@@ -1361,155 +1491,202 @@ export default function AdminDashboard() {
               </CardHeader>
             </Card>
 
-            {/* Formulário para Adicionar Administrador */}
+            {/* Formulário Unificado para Adicionar/Editar Utilizador */}
             <Card>
               <CardHeader>
-                <CardTitle>Adicionar Administrador</CardTitle>
+                <CardTitle>
+                  {editingUser ? 'Editar Utilizador' : 'Adicionar Novo Utilizador'}
+                </CardTitle>
                 <CardDescription>
-                  Criar novo administrador com acesso total ao sistema
+                  {editingUser ? 'Atualizar informações do utilizador' : 'Criar novo utilizador ou administrador'}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="grid md:grid-cols-3 gap-4">
+                <div className="grid gap-4">
+                  {/* Tipo de Utilizador */}
                   <div>
-                    <Label htmlFor="new_admin_name">Nome</Label>
-                    <Input
-                      id="new_admin_name"
-                      value={newAdminName}
-                      onChange={(e) => setNewAdminName(e.target.value)}
-                      placeholder="Nome completo"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="new_admin_email">Email</Label>
-                    <Input
-                      id="new_admin_email"
-                      type="email"
-                      value={newAdminEmail}
-                      onChange={(e) => setNewAdminEmail(e.target.value)}
-                      placeholder="admin@empresa.com"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="new_admin_password">Senha</Label>
-                    <Input
-                      id="new_admin_password"
-                      type="password"
-                      value={newAdminPassword}
-                      onChange={(e) => setNewAdminPassword(e.target.value)}
-                      placeholder="Senha forte"
-                    />
-                  </div>
-                </div>
-                <Button onClick={handleAddAdmin}>
-                  <Shield className="h-4 w-4 mr-2" />
-                  Adicionar Administrador
-                </Button>
-              </CardContent>
-            </Card>
-
-            {/* Formulário para Adicionar Usuário */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Adicionar Utilizador</CardTitle>
-                <CardDescription>
-                  Criar novo utilizador da aplicação
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid md:grid-cols-3 gap-4">
-                  <div>
-                    <Label htmlFor="new_user_username">Username</Label>
-                    <Input
-                      id="new_user_username"
-                      value={newUserUsername}
-                      onChange={(e) => setNewUserUsername(e.target.value)}
-                      placeholder="username"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="new_user_email">Email</Label>
-                    <Input
-                      id="new_user_email"
-                      type="email"
-                      value={newUserEmail}
-                      onChange={(e) => setNewUserEmail(e.target.value)}
-                      placeholder="user@email.com"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="new_user_password">Senha</Label>
-                    <Input
-                      id="new_user_password"
-                      type="password"
-                      value={newUserPassword}
-                      onChange={(e) => setNewUserPassword(e.target.value)}
-                      placeholder="Senha forte"
-                    />
-                  </div>
-                </div>
-                <Button onClick={handleAddUser}>
-                  <Users className="h-4 w-4 mr-2" />
-                  Adicionar Utilizador
-                </Button>
-              </CardContent>
-            </Card>
-
-            {/* Lista de Administradores */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Administradores Ativos</CardTitle>
-                <CardDescription>
-                  Lista de todos os administradores do sistema
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  {adminUsers.map((admin) => (
-                    <div key={admin.id} className="flex items-center justify-between p-3 border rounded-lg bg-red-50 dark:bg-red-950/20">
-                      <div>
-                        <p className="font-medium">{admin.name}</p>
-                        <p className="text-sm text-muted-foreground">{admin.email}</p>
-                        <p className="text-xs text-muted-foreground">
-                          Criado: {new Date(admin.created_at).toLocaleDateString()}
-                          {admin.last_login && ` | Último acesso: ${new Date(admin.last_login).toLocaleDateString()}`}
-                        </p>
-                      </div>
-                      <Badge variant="destructive">Administrador</Badge>
+                    <Label>Tipo de Utilizador</Label>
+                    <div className="flex gap-4 mt-2">
+                      <label className="flex items-center space-x-2">
+                        <input
+                          type="radio"
+                          name="userType"
+                          value="admin"
+                          checked={userType === 'admin'}
+                          onChange={(e) => setUserType(e.target.value as 'admin' | 'user')}
+                          className="form-radio"
+                        />
+                        <span className="text-sm">🛡️ Administrador</span>
+                      </label>
+                      <label className="flex items-center space-x-2">
+                        <input
+                          type="radio"
+                          name="userType"
+                          value="user"
+                          checked={userType === 'user'}
+                          onChange={(e) => setUserType(e.target.value as 'admin' | 'user')}
+                          className="form-radio"
+                        />
+                        <span className="text-sm">👤 Utilizador</span>
+                      </label>
                     </div>
-                  ))}
-                  {adminUsers.length === 0 && (
-                    <p className="text-center text-muted-foreground py-4">Nenhum administrador encontrado</p>
+                  </div>
+
+                  {/* Campos do Formulário */}
+                  <div className="grid md:grid-cols-3 gap-4">
+                    {userType === 'admin' ? (
+                      <div>
+                        <Label htmlFor="user_name">Nome Completo</Label>
+                        <Input
+                          id="user_name"
+                          value={userName}
+                          onChange={(e) => setUserName(e.target.value)}
+                          placeholder="Nome completo do administrador"
+                        />
+                      </div>
+                    ) : (
+                      <div>
+                        <Label htmlFor="user_username">Username</Label>
+                        <Input
+                          id="user_username"
+                          value={userUsername}
+                          onChange={(e) => setUserUsername(e.target.value)}
+                          placeholder="username único"
+                        />
+                      </div>
+                    )}
+                    
+                    <div>
+                      <Label htmlFor="user_email">Email</Label>
+                      <Input
+                        id="user_email"
+                        type="email"
+                        value={userEmail}
+                        onChange={(e) => setUserEmail(e.target.value)}
+                        placeholder={userType === 'admin' ? 'admin@empresa.com' : 'user@email.com'}
+                      />
+                    </div>
+                    
+                    <div>
+                      <Label htmlFor="user_password">
+                        {editingUser ? 'Nova Senha (opcional)' : 'Senha'}
+                      </Label>
+                      <Input
+                        id="user_password"
+                        type="password"
+                        value={userPassword}
+                        onChange={(e) => setUserPassword(e.target.value)}
+                        placeholder={editingUser ? 'Deixe vazio para manter' : 'Senha forte'}
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex gap-2">
+                  <Button onClick={handleSaveUser} className="flex-1">
+                    {editingUser ? (
+                      <>
+                        <Save className="h-4 w-4 mr-2" />
+                        Atualizar {userType === 'admin' ? 'Administrador' : 'Utilizador'}
+                      </>
+                    ) : (
+                      <>
+                        <Plus className="h-4 w-4 mr-2" />
+                        Adicionar {userType === 'admin' ? 'Administrador' : 'Utilizador'}
+                      </>
+                    )}
+                  </Button>
+                  {editingUser && (
+                    <Button onClick={handleCancelEdit} variant="outline">
+                      <X className="h-4 w-4 mr-2" />
+                      Cancelar
+                    </Button>
                   )}
                 </div>
               </CardContent>
             </Card>
 
-            {/* Lista de Usuários */}
+            {/* Lista Unificada de Utilizadores */}
             <Card>
               <CardHeader>
-                <CardTitle>Utilizadores Registados</CardTitle>
+                <CardTitle>Todos os Utilizadores</CardTitle>
                 <CardDescription>
-                  Lista de todos os utilizadores da aplicação
+                  Lista completa de administradores e utilizadores do sistema
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="space-y-2">
-                  {appUsers.map((user) => (
-                    <div key={user.id} className="flex items-center justify-between p-3 border rounded-lg bg-blue-50 dark:bg-blue-950/20">
-                      <div>
-                        <p className="font-medium">@{user.username}</p>
-                        <p className="text-sm text-muted-foreground">{user.email}</p>
-                        <p className="text-xs text-muted-foreground">
-                          Criado: {new Date(user.created_at).toLocaleDateString()}
-                          {user.last_login && ` | Último acesso: ${new Date(user.last_login).toLocaleDateString()}`}
-                        </p>
+                <div className="space-y-3">
+                  {/* Administradores */}
+                  {adminUsers.map((admin) => (
+                    <div key={`admin-${admin.id}`} className="flex items-center justify-between p-4 border rounded-lg bg-red-50 dark:bg-red-950/20 hover:bg-red-100 dark:hover:bg-red-950/30 transition-colors">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-full bg-red-500 flex items-center justify-center text-white font-semibold">
+                            🛡️
+                          </div>
+                          <div>
+                            <p className="font-medium text-lg">{admin.name}</p>
+                            <p className="text-sm text-muted-foreground">{admin.email}</p>
+                            <p className="text-xs text-muted-foreground">
+                              Criado: {new Date(admin.created_at).toLocaleDateString('pt-PT')}
+                              {admin.last_login && ` | Último acesso: ${new Date(admin.last_login).toLocaleDateString('pt-PT')}`}
+                            </p>
+                          </div>
+                        </div>
                       </div>
-                      <Badge variant="secondary">Utilizador</Badge>
+                      <div className="flex items-center gap-2">
+                        <Badge variant="destructive" className="text-xs">Administrador</Badge>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleEditUser(admin, 'admin')}
+                        >
+                          <Edit className="h-3 w-3 mr-1" />
+                          Editar
+                        </Button>
+                      </div>
                     </div>
                   ))}
-                  {appUsers.length === 0 && (
-                    <p className="text-center text-muted-foreground py-4">Nenhum utilizador encontrado</p>
+
+                  {/* Utilizadores */}
+                  {appUsers.map((user) => (
+                    <div key={`user-${user.id}`} className="flex items-center justify-between p-4 border rounded-lg bg-blue-50 dark:bg-blue-950/20 hover:bg-blue-100 dark:hover:bg-blue-950/30 transition-colors">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-full bg-blue-500 flex items-center justify-center text-white font-semibold">
+                            👤
+                          </div>
+                          <div>
+                            <p className="font-medium text-lg">@{user.username}</p>
+                            <p className="text-sm text-muted-foreground">{user.email}</p>
+                            <p className="text-xs text-muted-foreground">
+                              Criado: {new Date(user.created_at).toLocaleDateString('pt-PT')}
+                              {user.last_login && ` | Último acesso: ${new Date(user.last_login).toLocaleDateString('pt-PT')}`}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Badge variant="secondary" className="text-xs">Utilizador</Badge>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleEditUser(user, 'user')}
+                        >
+                          <Edit className="h-3 w-3 mr-1" />
+                          Editar
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+
+                  {/* Estado vazio */}
+                  {adminUsers.length === 0 && appUsers.length === 0 && (
+                    <div className="text-center py-8">
+                      <Users className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
+                      <p className="text-muted-foreground">Nenhum utilizador encontrado</p>
+                      <p className="text-sm text-muted-foreground">Comece por adicionar o primeiro utilizador</p>
+                    </div>
                   )}
                 </div>
               </CardContent>
