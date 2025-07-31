@@ -124,6 +124,15 @@ export default function LoginPage() {
                 'Iniciar Sessão'
               )}
             </Button>
+            
+            <Button 
+              type="button" 
+              variant="outline" 
+              className="w-full mt-2" 
+              onClick={() => navigate('/')}
+            >
+              🔙 Voltar
+            </Button>
           </form>
           <div className="mt-6 text-center text-sm text-muted-foreground">
             <p>Apenas administradores autorizados</p>

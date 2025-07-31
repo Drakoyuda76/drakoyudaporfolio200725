@@ -1,16 +1,34 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { Menu, X, Brain, Users, Target, Mail } from 'lucide-react';
+import { Menu, X, Brain, Users, Target, Mail, Settings } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/ui/theme-toggle';
+import { supabase } from '@/integrations/supabase/client';
 import PinModal from '@/components/admin/PinModal';
 import drakoLogo from '@/assets/drakoyuda_simbolo.png';
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showPinModal, setShowPinModal] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
+
+  useEffect(() => {
+    // Verificar se o administrador está logado
+    const checkAdminStatus = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      setIsAdmin(session?.user?.email === 'drakoyuda76@gmail.com');
+    };
+    
+    checkAdminStatus();
+    
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      setIsAdmin(session?.user?.email === 'drakoyuda76@gmail.com');
+    });
+    
+    return () => subscription.unsubscribe();
+  }, []);
 
   const navItems = [
     { href: '/', label: 'Início', icon: Brain, isScroll: false },
@@ -90,6 +108,17 @@ const Header = () => {
 
         {/* Theme Toggle & CTA Button */}
         <div className="hidden md:flex items-center space-x-4">
+          {isAdmin && (
+            <Button
+              onClick={() => navigate('/admin')}
+              variant="secondary"
+              size="sm"
+              className="flex items-center gap-2"
+            >
+              <Settings className="w-4 h-4" />
+              🔐 Voltar para Administrador
+            </Button>
+          )}
           <ThemeToggle />
           <Button 
             variant="outline" 

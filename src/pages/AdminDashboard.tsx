@@ -18,6 +18,7 @@ import {
   Target,
   TrendingUp,
   Building,
+  Eye,
   Mail,
   Edit,
   Trash2,
@@ -800,6 +801,14 @@ export default function AdminDashboard() {
           </div>
           <div className="flex items-center gap-4">
             <span className="text-sm">Bem-vindo, {user?.email}</span>
+            <Button 
+              variant="secondary" 
+              size="sm" 
+              onClick={() => window.open('/', '_blank')}
+            >
+              <Eye className="h-4 w-4 mr-2" />
+              👁️ Ver como Visitante
+            </Button>
             <Button variant="outline" size="sm" onClick={handleLogout}>
               <LogOut className="h-4 w-4 mr-2" />
               Sair
