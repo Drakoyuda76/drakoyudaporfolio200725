@@ -51,7 +51,10 @@ const ContactPage = () => {
           src="https://87cfebbd-659b-481a-91f0-a323e38fd0d3.lovableproject.com/embed/system/95999609-cf1f-4aaf-965f-5133876efd11"
           style={{ width: '500px', height: '650px', border: 'none' }}
           allow="microphone; camera"
-          loading="lazy"
+          loading="eager"
+          title="BotBwala Chatbot"
+          sandbox="allow-scripts allow-same-origin allow-forms"
+          frameBorder="0"
         />
       </div>
       {/* End BotBwala Chatbot */}
