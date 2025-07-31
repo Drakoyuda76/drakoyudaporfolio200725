@@ -8,7 +8,6 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { ErrorBoundary } from "react-error-boundary";
 import ScrollToTop from "@/components/ui/scroll-to-top";
-import ChatAssistant from "@/components/ui/chat-assistant";
 import HomePage from "./pages/HomePage";
 import SolutionsPage from "./pages/SolutionsPage";
 import AboutPage from "./pages/AboutPage";
@@ -85,7 +84,6 @@ function App() {
                 <Route path="*" element={<NotFound />} />
               </Routes>
               <ScrollToTop />
-              <ChatAssistant />
             </ErrorBoundary>
           </BrowserRouter>
         </TooltipProvider>
