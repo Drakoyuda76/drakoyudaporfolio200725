@@ -49,6 +49,7 @@ const AdminPanel = () => {
     setShowSolutionForm(true);
   };
 
+
   const handleDeleteSolution = async (id: string) => {
     if (!confirm('Tem certeza que deseja excluir esta solução?')) return;
     

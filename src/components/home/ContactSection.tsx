@@ -22,9 +22,11 @@ const ContactSection = () => {
       const { data, error } = await supabase
         .from('empresa_contactos')
         .select('*')
-        .maybeSingle();
+        .order('updated_at', { ascending: false })
+        .limit(1)
+        .single();
 
-      if (error) {
+      if (error && error.code !== 'PGRST116') {
         console.error('Erro ao carregar informações de contacto:', error);
         return;
       }

@@ -37,7 +37,9 @@ const StatisticsForm = () => {
       const { data, error } = await supabase
         .from('estatisticas')
         .select('*')
-        .maybeSingle();
+        .order('updated_at', { ascending: false })
+        .limit(1)
+        .single();
 
       if (error) {
         console.error('Error loading statistics:', error);
