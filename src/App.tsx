@@ -70,10 +70,10 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
         <TooltipProvider>
-          <ErrorBoundary FallbackComponent={ErrorFallback}>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
+          <BrowserRouter>
+            <ErrorBoundary FallbackComponent={ErrorFallback}>
+              <Toaster />
+              <Sonner />
               <Routes>
                 <Route path="/" element={<HomePage />} />
                 <Route path="/solucoes" element={<SolutionsPage />} />
@@ -86,8 +86,8 @@ function App() {
               </Routes>
               <ScrollToTop />
               <ChatAssistant />
-            </BrowserRouter>
-          </ErrorBoundary>
+            </ErrorBoundary>
+          </BrowserRouter>
         </TooltipProvider>
       </ThemeProvider>
     </QueryClientProvider>
