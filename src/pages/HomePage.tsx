@@ -174,18 +174,18 @@ const HomePage = () => {
             </div>
           </div>
         </section>
-        
-        {/* BotBwala Chatbot */}
-        <section className="py-8 bg-background flex justify-center">
-          <iframe 
-            src="https://87cfebbd-659b-481a-91f0-a323e38fd0d3.lovableproject.com/embed/system/95999609-cf1f-4aaf-965f-5133876efd11"
-            style={{ width: '500px', height: '650px', border: 'none' }}
-            allow="microphone; camera"
-            loading="lazy"
-          />
-        </section>
-        {/* End BotBwala Chatbot */}
       </main>
+      
+      {/* BotBwala Chatbot - Fixed na lateral direita */}
+      <div className="fixed bottom-4 right-4 z-50">
+        <iframe 
+          src="https://87cfebbd-659b-481a-91f0-a323e38fd0d3.lovableproject.com/embed/system/95999609-cf1f-4aaf-965f-5133876efd11"
+          style={{ width: '500px', height: '650px', border: 'none' }}
+          allow="microphone; camera"
+          loading="lazy"
+        />
+      </div>
+      {/* End BotBwala Chatbot */}
       
       {/* Footer */}
       <footer className="border-t border-border/40 bg-card/30 py-8">
