@@ -11,6 +11,7 @@ const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showPinModal, setShowPinModal] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isAdminViewingAsVisitor, setIsAdminViewingAsVisitor] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -18,17 +19,33 @@ const Header = () => {
     // Verificar se o administrador está logado
     const checkAdminStatus = async () => {
       const { data: { session } } = await supabase.auth.getSession();
-      setIsAdmin(session?.user?.email === 'drakoyuda76@gmail.com');
+      const adminLoggedIn = session?.user?.email === 'drakoyuda76@gmail.com';
+      setIsAdmin(adminLoggedIn);
+      
+      // Verificar se admin está visualizando como visitante
+      const viewingAsVisitor = localStorage.getItem("isAdminViewingAsVisitor") === "true";
+      setIsAdminViewingAsVisitor(adminLoggedIn && viewingAsVisitor);
     };
     
     checkAdminStatus();
     
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      setIsAdmin(session?.user?.email === 'drakoyuda76@gmail.com');
+      const adminLoggedIn = session?.user?.email === 'drakoyuda76@gmail.com';
+      setIsAdmin(adminLoggedIn);
+      
+      // Verificar se admin está visualizando como visitante
+      const viewingAsVisitor = localStorage.getItem("isAdminViewingAsVisitor") === "true";
+      setIsAdminViewingAsVisitor(adminLoggedIn && viewingAsVisitor);
     });
     
     return () => subscription.unsubscribe();
   }, []);
+
+  const handleBackToAdmin = () => {
+    // Limpar flag de visualização como visitante
+    localStorage.removeItem("isAdminViewingAsVisitor");
+    navigate('/admin');
+  };
 
   const navItems = [
     { href: '/', label: 'Início', icon: Brain, isScroll: false },
@@ -108,9 +125,19 @@ const Header = () => {
 
         {/* Theme Toggle & CTA Button */}
         <div className="hidden md:flex items-center space-x-4">
-          {isAdmin && (
+          {isAdminViewingAsVisitor ? (
             <Button
-              onClick={() => navigate('/admin')}
+              onClick={handleBackToAdmin}
+              variant="default"
+              size="sm"
+              className="bg-red-500 hover:bg-red-600 text-white flex items-center gap-2"
+            >
+              <Settings className="w-4 h-4" />
+              🔐 Voltar para Administrador
+            </Button>
+          ) : isAdmin ? (
+            <Button
+              onClick={handleBackToAdmin}
               variant="secondary"
               size="sm"
               className="flex items-center gap-2"
@@ -118,23 +145,26 @@ const Header = () => {
               <Settings className="w-4 h-4" />
               🔐 Voltar para Administrador
             </Button>
+          ) : (
+            <>
+              <Button 
+                variant="outline" 
+                size="sm"
+                className="border-accent/30 text-accent hover:bg-accent/10"
+                onClick={() => navigate('/contacto')}
+              >
+                Contactar
+              </Button>
+              <Button 
+                variant="default" 
+                size="sm"
+                onClick={() => setShowPinModal(true)}
+              >
+                Admin
+              </Button>
+            </>
           )}
           <ThemeToggle />
-          <Button 
-            variant="outline" 
-            size="sm"
-            className="border-accent/30 text-accent hover:bg-accent/10"
-            onClick={() => navigate('/contacto')}
-          >
-            Contactar
-          </Button>
-          <Button 
-            variant="default" 
-            size="sm"
-            onClick={() => setShowPinModal(true)}
-          >
-            Admin
-          </Button>
         </div>
 
         {/* Mobile Menu Button */}
@@ -173,26 +203,55 @@ const Header = () => {
               <div className="flex justify-center">
                 <ThemeToggle />
               </div>
-              <Button 
-                className="w-full justify-center border-accent/30 text-accent hover:bg-accent/10" 
-                variant="outline"
-                onClick={() => {
-                  navigate('/contacto');
-                  setIsMenuOpen(false);
-                }}
-              >
-                Contactar
-              </Button>
+              {isAdminViewingAsVisitor ? (
+                <Button 
+                  className="w-full justify-center bg-red-500 hover:bg-red-600 text-white" 
+                  onClick={() => {
+                    handleBackToAdmin();
+                    setIsMenuOpen(false);
+                  }}
+                >
+                  🔐 Voltar para Administrador
+                </Button>
+              ) : isAdmin ? (
+                <Button 
+                  className="w-full justify-center" 
+                  variant="secondary"
+                  onClick={() => {
+                    handleBackToAdmin();
+                    setIsMenuOpen(false);
+                  }}
+                >
+                  🔐 Voltar para Administrador
+                </Button>
+              ) : (
+                <Button 
+                  className="w-full justify-center border-accent/30 text-accent hover:bg-accent/10" 
+                  variant="outline"
+                  onClick={() => {
+                    navigate('/contacto');
+                    setIsMenuOpen(false);
+                  }}
+                >
+                  Contactar
+                </Button>
+              )}
             </div>
           </nav>
         </div>
       )}
       
-      <PinModal
-        isOpen={showPinModal}
-        onClose={() => setShowPinModal(false)}
-        onSuccess={() => navigate('/admin')}
-      />
+      {/* Mostrar PinModal apenas se não for admin visualizando como visitante */}
+      {!isAdminViewingAsVisitor && (
+        <PinModal
+          isOpen={showPinModal}
+          onClose={() => setShowPinModal(false)}
+          onSuccess={() => {
+            localStorage.removeItem("isAdminViewingAsVisitor");
+            navigate('/admin');
+          }}
+        />
+      )}
     </header>
   );
 };

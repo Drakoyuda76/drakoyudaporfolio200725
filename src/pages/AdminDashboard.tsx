@@ -934,7 +934,11 @@ export default function AdminDashboard() {
             <Button 
               variant="secondary" 
               size="sm" 
-              onClick={() => window.open('/', '_blank')}
+              onClick={() => {
+                // Marcar que admin está visualizando como visitante
+                localStorage.setItem("isAdminViewingAsVisitor", "true");
+                window.open('/', '_blank');
+              }}
             >
               <Eye className="h-4 w-4 mr-2" />
               👁️ Ver como Visitante
