@@ -819,7 +819,7 @@ export default function AdminDashboard() {
 
       <div className="container mx-auto px-4 py-6">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="grid w-full grid-cols-7">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="dashboard">
               <BarChart3 className="h-4 w-4 mr-2" />
               Dashboard
@@ -840,13 +840,9 @@ export default function AdminDashboard() {
               <Mail className="h-4 w-4 mr-2" />
               Contactos
             </TabsTrigger>
-            <TabsTrigger value="admins">
-              <Shield className="h-4 w-4 mr-2" />
-              Admins
-            </TabsTrigger>
-            <TabsTrigger value="usuarios">
+            <TabsTrigger value="utilizadores">
               <Users className="h-4 w-4 mr-2" />
-              Usuários
+              Utilizadores
             </TabsTrigger>
           </TabsList>
 
@@ -1333,18 +1329,17 @@ export default function AdminDashboard() {
             </Card>
           </TabsContent>
 
-          {/* Gestão de Admins */}
-          <TabsContent value="admins" className="space-y-6">
+          {/* Gestão Unificada de Utilizadores */}
+          <TabsContent value="utilizadores" className="space-y-6">
+            {/* Botões de Importar/Exportar */}
             <Card>
-              <CardHeader className="flex flex-row items-center justify-between">
-                <div>
-                  <CardTitle>Gestão de Administradores</CardTitle>
-                  <CardDescription>
-                    Adicionar e gerir administradores do sistema
-                  </CardDescription>
-                </div>
+              <CardHeader>
+                <CardTitle>Gestão de Utilizadores</CardTitle>
+                <CardDescription>
+                  Gerir administradores e utilizadores da aplicação
+                </CardDescription>
                 <div className="flex items-center gap-2">
-                  <Button variant="outline" onClick={exportUsers}>
+                  <Button variant="outline" onClick={() => exportUsers()}>
                     <Download className="w-4 h-4 mr-2" />
                     Exportar JSON
                   </Button>
@@ -1364,6 +1359,16 @@ export default function AdminDashboard() {
                   </label>
                 </div>
               </CardHeader>
+            </Card>
+
+            {/* Formulário para Adicionar Administrador */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Adicionar Administrador</CardTitle>
+                <CardDescription>
+                  Criar novo administrador com acesso total ao sistema
+                </CardDescription>
+              </CardHeader>
               <CardContent className="space-y-4">
                 <div className="grid md:grid-cols-3 gap-4">
                   <div>
@@ -1372,7 +1377,7 @@ export default function AdminDashboard() {
                       id="new_admin_name"
                       value={newAdminName}
                       onChange={(e) => setNewAdminName(e.target.value)}
-                      placeholder="Nome do Administrador"
+                      placeholder="Nome completo"
                     />
                   </div>
                   <div>
@@ -1382,7 +1387,7 @@ export default function AdminDashboard() {
                       type="email"
                       value={newAdminEmail}
                       onChange={(e) => setNewAdminEmail(e.target.value)}
-                      placeholder="admin@drakoyuda.com"
+                      placeholder="admin@empresa.com"
                     />
                   </div>
                   <div>
@@ -1403,41 +1408,12 @@ export default function AdminDashboard() {
               </CardContent>
             </Card>
 
-            {/* Lista de Administradores */}
+            {/* Formulário para Adicionar Usuário */}
             <Card>
               <CardHeader>
-                <CardTitle>Administradores Ativos</CardTitle>
+                <CardTitle>Adicionar Utilizador</CardTitle>
                 <CardDescription>
-                  Lista de todos os administradores do sistema
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-2">
-                  {adminUsers.map((admin) => (
-                    <div key={admin.id} className="flex items-center justify-between p-3 border rounded-lg">
-                      <div>
-                        <p className="font-medium">{admin.name}</p>
-                        <p className="text-sm text-muted-foreground">{admin.email}</p>
-                        <p className="text-xs text-muted-foreground">
-                          Criado: {new Date(admin.created_at).toLocaleDateString()}
-                          {admin.last_login && ` | Último acesso: ${new Date(admin.last_login).toLocaleDateString()}`}
-                        </p>
-                      </div>
-                      <Badge variant="secondary">Admin</Badge>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* Gestão de Usuários */}
-          <TabsContent value="usuarios" className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Gestão de Usuários</CardTitle>
-                <CardDescription>
-                  Adicionar e gerir usuários da aplicação
+                  Criar novo utilizador da aplicação
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -1474,23 +1450,53 @@ export default function AdminDashboard() {
                 </div>
                 <Button onClick={handleAddUser}>
                   <Users className="h-4 w-4 mr-2" />
-                  Adicionar Usuário
+                  Adicionar Utilizador
                 </Button>
+              </CardContent>
+            </Card>
+
+            {/* Lista de Administradores */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Administradores Ativos</CardTitle>
+                <CardDescription>
+                  Lista de todos os administradores do sistema
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-2">
+                  {adminUsers.map((admin) => (
+                    <div key={admin.id} className="flex items-center justify-between p-3 border rounded-lg bg-red-50 dark:bg-red-950/20">
+                      <div>
+                        <p className="font-medium">{admin.name}</p>
+                        <p className="text-sm text-muted-foreground">{admin.email}</p>
+                        <p className="text-xs text-muted-foreground">
+                          Criado: {new Date(admin.created_at).toLocaleDateString()}
+                          {admin.last_login && ` | Último acesso: ${new Date(admin.last_login).toLocaleDateString()}`}
+                        </p>
+                      </div>
+                      <Badge variant="destructive">Administrador</Badge>
+                    </div>
+                  ))}
+                  {adminUsers.length === 0 && (
+                    <p className="text-center text-muted-foreground py-4">Nenhum administrador encontrado</p>
+                  )}
+                </div>
               </CardContent>
             </Card>
 
             {/* Lista de Usuários */}
             <Card>
               <CardHeader>
-                <CardTitle>Usuários Registados</CardTitle>
+                <CardTitle>Utilizadores Registados</CardTitle>
                 <CardDescription>
-                  Lista de todos os usuários da aplicação
+                  Lista de todos os utilizadores da aplicação
                 </CardDescription>
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
                   {appUsers.map((user) => (
-                    <div key={user.id} className="flex items-center justify-between p-3 border rounded-lg">
+                    <div key={user.id} className="flex items-center justify-between p-3 border rounded-lg bg-blue-50 dark:bg-blue-950/20">
                       <div>
                         <p className="font-medium">@{user.username}</p>
                         <p className="text-sm text-muted-foreground">{user.email}</p>
@@ -1499,9 +1505,12 @@ export default function AdminDashboard() {
                           {user.last_login && ` | Último acesso: ${new Date(user.last_login).toLocaleDateString()}`}
                         </p>
                       </div>
-                      <Badge variant="outline">Usuário</Badge>
+                      <Badge variant="secondary">Utilizador</Badge>
                     </div>
                   ))}
+                  {appUsers.length === 0 && (
+                    <p className="text-center text-muted-foreground py-4">Nenhum utilizador encontrado</p>
+                  )}
                 </div>
               </CardContent>
             </Card>
