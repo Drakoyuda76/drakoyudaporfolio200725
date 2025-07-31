@@ -7,7 +7,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "@/components/providers/theme-provider";
 import { ErrorBoundary } from "react-error-boundary";
-import ScrollToTop from "@/components/ui/scroll-to-top";
+
 import HomePage from "./pages/HomePage";
 import SolutionsPage from "./pages/SolutionsPage";
 import AboutPage from "./pages/AboutPage";
@@ -83,7 +83,7 @@ function App() {
                 <Route path="/admin" element={<AdminDashboard />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
-              <ScrollToTop />
+              
             </ErrorBoundary>
           </BrowserRouter>
         </TooltipProvider>
