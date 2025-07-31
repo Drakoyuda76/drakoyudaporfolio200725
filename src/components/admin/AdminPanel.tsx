@@ -182,11 +182,11 @@ const AdminPanel = () => {
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-6 py-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-foreground mb-2">Painel Administrativo</h1>
-          <p className="text-muted-foreground">Gerir conteúdos e configurações do sistema</p>
+          <h1 className="text-3xl font-bold text-foreground mb-2">Painel Administrativo - ATUALIZADO</h1>
+          <p className="text-muted-foreground">Gerir conteúdos e configurações do sistema - Versão Funcional</p>
         </div>
 
-        <Tabs defaultValue="solutions" className="space-y-6">
+        <Tabs defaultValue="admins" className="space-y-6">
           <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="solutions" className="flex items-center gap-2">
               <FileText className="w-4 h-4" />
