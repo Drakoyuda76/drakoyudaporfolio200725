@@ -38,16 +38,16 @@ const ContactInfoForm = () => {
         .from('empresa_contactos')
         .select('*')
         .order('updated_at', { ascending: false })
-        .limit(1)
-        .single();
+        .limit(1);
 
-      if (error && error.code !== 'PGRST116') {
+      if (error) {
         console.error('Error loading contact info:', error);
+        setInitialLoad(false);
         return;
       }
 
-      if (data) {
-        setFormData(data);
+      if (data && data.length > 0) {
+        setFormData(data[0]);
       }
     } catch (error) {
       console.error('Error loading contact info:', error);
