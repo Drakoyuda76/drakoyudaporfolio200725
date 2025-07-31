@@ -2,6 +2,7 @@ import Header from '@/components/layout/Header';
 import ContactSection from '@/components/home/ContactSection';
 import { ArrowLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import ChatbotLoader from '@/components/ui/chatbot-loader';
 
 const ContactPage = () => {
   return (
@@ -37,26 +38,7 @@ const ContactPage = () => {
       </main>
       
       {/* BotBwala Chatbot - Fixed na lateral direita */}
-      <div 
-        className="fixed bottom-4 right-4" 
-        style={{ 
-          zIndex: 9999, 
-          position: 'fixed',
-          display: 'block',
-          visibility: 'visible',
-          opacity: 1
-        }}
-      >
-        <iframe 
-          src="https://87cfebbd-659b-481a-91f0-a323e38fd0d3.lovableproject.com/embed/system/95999609-cf1f-4aaf-965f-5133876efd11"
-          style={{ width: '500px', height: '650px', border: 'none' }}
-          allow="microphone; camera; fullscreen"
-          loading="eager"
-          title="BotBwala Chatbot"
-          sandbox="allow-scripts allow-same-origin allow-forms allow-popups allow-popups-to-escape-sandbox allow-top-navigation-by-user-activation"
-          referrerPolicy="no-referrer-when-downgrade"
-        />
-      </div>
+      <ChatbotLoader src="https://87cfebbd-659b-481a-91f0-a323e38fd0d3.lovableproject.com/embed/system/95999609-cf1f-4aaf-965f-5133876efd11" />
       {/* End BotBwala Chatbot */}
       
       {/* Footer */}
